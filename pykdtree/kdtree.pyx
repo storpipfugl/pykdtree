@@ -36,15 +36,17 @@ cdef class KDTree:
     cdef int n
     cdef int ndim
     
-    def __init__(KDTree self, np.ndarray data_pts not None, int leaf_size):
+    def __init__(KDTree self, np.ndarray data_pts not None, int leaf_size=10):
         cdef np.ndarray[double, ndim=1] data_array = np.ascontiguousarray(data_pts.ravel(), dtype=np.float)
         self._data_array_data = <double *>data_array.data
         self.n = data_pts.shape[0]
-        self.ndim = data_pts.ndim 
+        if data_pts.ndim == 1:
+            self.ndim = 1
+        else:
+            self.ndim = data_pts.shape[1] 
         
         with nogil:
             self._kdtree = construct_tree(self._data_array_data, self.ndim, self.n, leaf_size) 
-        print 'da[100] : ', self._data_array_data[100]
         
     def query(KDTree self, np.ndarray query_pts not None):
         cdef np.ndarray[double, ndim=1] query_array = np.ascontiguousarray(query_pts.ravel(), dtype=np.float)
