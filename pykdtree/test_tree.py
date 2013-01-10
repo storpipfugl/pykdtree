@@ -5,9 +5,9 @@ from pykdtree.kdtree import KDTree
 
 def test1d():
     data_pts = np.arange(1000)
-    kdtree = KDTree(data_pts, 10)
+    kdtree = KDTree(data_pts, leafsize=15)
     query_pts = np.arange(400, 300, -10)
-    idx, dist = kdtree.query(query_pts)
+    dist, idx = kdtree.query(query_pts)
     assert idx[0] == 400
     assert dist[0] == 0
     assert idx[1] == 390
@@ -120,7 +120,7 @@ def test3d():
                           [769957.188, -202418.125, 6321069.5]])
                           
     kdtree = KDTree(data_pts)
-    idx, dist = kdtree.query(query_pts)
+    dist, idx = kdtree.query(query_pts)
 
     epsilon = 1e-5
     assert idx[0] == 7

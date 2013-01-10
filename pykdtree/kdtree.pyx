@@ -32,12 +32,14 @@ cdef extern void delete_tree(tree *kdtree)
 cdef class KDTree:
 
     cdef tree *_kdtree
+    cdef np.ndarray _data_array
     cdef double *_data_array_data
     cdef int n
     cdef int ndim
     
-    def __init__(KDTree self, np.ndarray data_pts not None, int leaf_size=10):
-        cdef np.ndarray[double, ndim=1] data_array = np.ascontiguousarray(data_pts.ravel(), dtype=np.float)
+    def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=10):
+        cdef np.ndarray[double, ndim=1] data_array = np.ascontiguousarray(data_pts.ravel(), dtype=np.float64)
+        self._data_array = data_array
         self._data_array_data = <double *>data_array.data
         self.n = data_pts.shape[0]
         if data_pts.ndim == 1:
@@ -46,10 +48,10 @@ cdef class KDTree:
             self.ndim = data_pts.shape[1] 
         
         with nogil:
-            self._kdtree = construct_tree(self._data_array_data, self.ndim, self.n, leaf_size) 
+            self._kdtree = construct_tree(self._data_array_data, self.ndim, self.n, leafsize) 
         
-    def query(KDTree self, np.ndarray query_pts not None):
-        cdef np.ndarray[double, ndim=1] query_array = np.ascontiguousarray(query_pts.ravel(), dtype=np.float)
+    def query(KDTree self, np.ndarray query_pts not None, sqr_dists=False):
+        cdef np.ndarray[double, ndim=1] query_array = np.ascontiguousarray(query_pts.ravel(), dtype=np.float64)
         cdef double *query_array_data = <double *>query_array.data
         
         num_qpoints = query_pts.shape[0]
@@ -60,8 +62,11 @@ cdef class KDTree:
     
         with nogil:
             search_tree(self._kdtree, self._data_array_data, query_array_data, num_qpoints, closest_idxs_data, closest_dists_data)
-            
-        return closest_idxs, closest_dists
+        
+        if sqr_dists:
+            return np.sqrt(closest_dists), closest_idxs
+        else:    
+            return closest_dists, closest_idxs
     
     def __dealloc__(KDTree self):
         if <int>(self._kdtree) == 0:
