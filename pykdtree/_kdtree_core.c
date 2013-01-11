@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <float.h>
 
 #define PA(i,d)			(pa[no_dims * pidx[i] + d])
 #define PASWAP(a,b) { uint32_t tmp = pidx[a]; pidx[a] = pidx[b]; pidx[b] = tmp; }
@@ -100,7 +101,7 @@ int partition(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, ui
 {
     int8_t dim = 0;
     uint32_t p, q;
-    double size = 0, min_val, max_val, split, side_len;
+    double size = 0, min_val, max_val, split, side_len, cur_val;
     uint32_t end_idx = start_idx + n - 1;
     
     /* Find largest bounding box side */
@@ -135,6 +136,7 @@ int partition(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, ui
         }
         else if (PA(q, dim) >= split)
         {
+            /* Guard for underflow */
             if (q > 0) 
             {
                 q--;
@@ -159,14 +161,17 @@ int partition(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, ui
            Split at lowest point instead.
            Minimum 1 point will be in lower box.
         */
+        
         uint32_t j = start_idx;
         split = PA(j, dim);
-        for (uint32_t i = start_idx + 1; i <= end_idx; i++)
+        for (uint32_t i = start_idx + 1; i <= end_idx; i++) 
         {
-            if (PA(i, dim) < split)
+            /* Find lowest point */
+            cur_val = PA(i, dim); 
+            if (cur_val < split)
             {
                 j = i;
-                split = PA(j, dim);
+                split = cur_val;
             }
         }
         PASWAP(j, start_idx);
@@ -178,14 +183,17 @@ int partition(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, ui
            Split at highest point instead.
            Minimum 1 point will be in higher box.
         */
+        
         uint32_t j = end_idx;
         split = PA(j, dim);
         for (uint32_t i = start_idx; i < end_idx; i++)
         {
-            if (PA(i, dim) > split)
+            /* Find highest point */
+            cur_val = PA(i, dim);
+            if (cur_val > split)
             {
                 j = i;
-                split = PA(j, dim);
+                split = cur_val;
             }    
         }
         PASWAP(j, end_idx);
@@ -268,6 +276,7 @@ Tree* construct_tree(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp)
     Tree *tree = (Tree *)malloc(sizeof(Tree));
     tree->no_dims = no_dims;
     
+    /* Initialize permutation array */
     uint32_t *pidx = (uint32_t *)malloc(sizeof(uint32_t) * n);
     for (uint32_t i = 0; i < n; i++)
     {
@@ -278,6 +287,7 @@ Tree* construct_tree(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp)
     get_bounding_box(pa, pidx, no_dims, n, bbox);
     tree->bbox = bbox;
 
+    /* Construct subtree on full dataset */
     tree->root = (struct Node *)construct_subtree(pa, pidx, no_dims, 0, n, bsp, bbox);
 
     tree->pidx = pidx;
@@ -343,7 +353,7 @@ void print_tree(Node *root, int level)
 }
 
 /************************************************
-Calculate cartesian distance between points
+Calculate squared cartesian distance between points
 Params:
     point1_coord : point 1
     point2_coord : point 2
@@ -534,13 +544,17 @@ void search_tree(Tree *tree, double * restrict pa, double * restrict point_coord
     uint32_t *pidx = tree->pidx;
     Node *root = (Node *)tree->root;
 
+    /* Queries are OpenMP enabled */
     #pragma omp parallel
     {
+        /* The low chunk size is important to avoid L2 cache trashing  
+           for spatial coherent query datasets
+        */
         #pragma omp for schedule(static, 100) nowait
         for (uint32_t i = 0; i < num_points; i++)
         {
-            closest_idxs[i] = -1;
-            closest_dists[i] = 1e300;
+            closest_idxs[i] = UINT32_MAX;
+            closest_dists[i] = DBL_MAX;
             min_dist = get_min_dist(point_coords + no_dims * i, no_dims, bbox);
             search_splitnode(root, pa, pidx, no_dims, point_coords + no_dims * i, min_dist,
                              &closest_idxs[i], &closest_dists[i]);
