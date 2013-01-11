@@ -3,16 +3,16 @@ import threading
 
 import numpy as np
 cimport numpy as np
-from libc.stdint cimport uint32_t
+from libc.stdint cimport uint32_t, int8_t
 cimport cython
 
 
 # Node structure
 cdef struct node:
     double cut_val
-    int cut_dim
-    int start_idx
-    int n
+    int8_t cut_dim
+    uint32_t start_idx
+    uint32_t n
     double cut_bounds_lv
     double cut_bounds_hv
     node *left_child
@@ -20,13 +20,13 @@ cdef struct node:
     
 cdef struct tree:
     double *bbox
-    int no_dims
-    int *pidx
+    int8_t no_dims
+    uint32_t *pidx
     node *root    
     
 
-cdef extern tree* construct_tree(double *pa, int no_dims, int n, int bsp) nogil
-cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, int num_points, int *closest_idxs, double *closest_dists) nogil
+cdef extern tree* construct_tree(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
+cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t *closest_idxs, double *closest_dists) nogil
 cdef extern void delete_tree(tree *kdtree)
 
 cdef class KDTree:
@@ -34,30 +34,32 @@ cdef class KDTree:
     cdef tree *_kdtree
     cdef np.ndarray _data_array
     cdef double *_data_array_data
-    cdef int n
-    cdef int ndim
+    cdef uint32_t n
+    cdef int8_t ndim
+    cdef uint32_t leafsize
     
     def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=10):
         cdef np.ndarray[double, ndim=1] data_array = np.ascontiguousarray(data_pts.ravel(), dtype=np.float64)
         self._data_array = data_array
         self._data_array_data = <double *>data_array.data
-        self.n = data_pts.shape[0]
+        self.n = <uint32_t>data_pts.shape[0]
+        self.leafsize = <uint32_t>leafsize
         if data_pts.ndim == 1:
             self.ndim = 1
         else:
-            self.ndim = data_pts.shape[1] 
+            self.ndim = <int8_t>data_pts.shape[1] 
         
         with nogil:
-            self._kdtree = construct_tree(self._data_array_data, self.ndim, self.n, leafsize) 
+            self._kdtree = construct_tree(self._data_array_data, self.ndim, self.n, self.leafsize) 
         
     def query(KDTree self, np.ndarray query_pts not None, sqr_dists=False):
         cdef np.ndarray[double, ndim=1] query_array = np.ascontiguousarray(query_pts.ravel(), dtype=np.float64)
         cdef double *query_array_data = <double *>query_array.data
         
         num_qpoints = query_pts.shape[0]
-        cdef np.ndarray[int, ndim=1] closest_idxs = np.empty(num_qpoints, dtype=np.int32)
+        cdef np.ndarray[uint32_t, ndim=1] closest_idxs = np.empty(num_qpoints, dtype=np.uint32)
         cdef np.ndarray[double, ndim=1] closest_dists = np.empty(num_qpoints, dtype=np.float)
-        cdef int *closest_idxs_data = <int *>closest_idxs.data
+        cdef uint32_t *closest_idxs_data = <uint32_t *>closest_idxs.data
         cdef double *closest_dists_data = <double *>closest_dists.data
     
         with nogil:
