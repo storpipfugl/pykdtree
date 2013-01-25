@@ -43,7 +43,7 @@ void search_leaf(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx,
 void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx, int8_t no_dims, double * restrict point_coord, 
                       double min_dist, uint32_t * restrict closest_idx, double * restrict closest_dist);
 void search_tree(Tree *tree, double * restrict pa, double * restrict point_coords, 
-                 uint32_t num_points, uint32_t * restrict closest_idxs, double * restrict closest_dists);
+                 uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists);
 
 /************************************************
 Get the bounding box of a set of points
@@ -536,7 +536,7 @@ Params:
     bbox : bounding box of data points
 ************************************************/
 void search_tree(Tree *tree, double * restrict pa, double * restrict point_coords, 
-                 uint32_t num_points, uint32_t * restrict closest_idxs, double * restrict closest_dists)
+                 uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists)
 {
     double min_dist;
     int8_t no_dims = tree->no_dims;

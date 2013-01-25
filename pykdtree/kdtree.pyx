@@ -26,7 +26,7 @@ cdef struct tree:
     
 
 cdef extern tree* construct_tree(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
-cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t *closest_idxs, double *closest_dists) nogil
+cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, uint32_t *closest_idxs, double *closest_dists) nogil
 cdef extern void delete_tree(tree *kdtree)
 
 cdef class KDTree:
@@ -52,18 +52,19 @@ cdef class KDTree:
         with nogil:
             self._kdtree = construct_tree(self._data_array_data, self.ndim, self.n, self.leafsize) 
         
-    def query(KDTree self, np.ndarray query_pts not None, sqr_dists=False):
+    def query(KDTree self, np.ndarray query_pts not None, k=1, distance_upper_bound=None, sqr_dists=False):
         cdef np.ndarray[double, ndim=1] query_array = np.ascontiguousarray(query_pts.ravel(), dtype=np.float64)
         cdef double *query_array_data = <double *>query_array.data
         
-        num_qpoints = query_pts.shape[0]
+        cdef uint32_t num_qpoints = query_pts.shape[0]
+        cdef uint32_t num_n = k
         cdef np.ndarray[uint32_t, ndim=1] closest_idxs = np.empty(num_qpoints, dtype=np.uint32)
         cdef np.ndarray[double, ndim=1] closest_dists = np.empty(num_qpoints, dtype=np.float)
         cdef uint32_t *closest_idxs_data = <uint32_t *>closest_idxs.data
         cdef double *closest_dists_data = <double *>closest_dists.data
     
         with nogil:
-            search_tree(self._kdtree, self._data_array_data, query_array_data, num_qpoints, closest_idxs_data, closest_dists_data)
+            search_tree(self._kdtree, self._data_array_data, query_array_data, num_qpoints, num_n, closest_idxs_data, closest_dists_data)
         
         if sqr_dists:
             return np.sqrt(closest_dists), closest_idxs
