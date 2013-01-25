@@ -39,9 +39,9 @@ double calc_dist(double *point1_coord, double *point2_coord, int8_t no_dims);
 double get_cube_offset(int8_t dim, double *point_coord, double *bbox);
 double get_min_dist(double *point_coord, int8_t no_dims, double *bbox);
 void search_leaf(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *point_coord, 
-                 uint32_t *closest_idx, double *closest_dist);
+                 uint32_t k, uint32_t *closest_idx, double *closest_dist);
 void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx, int8_t no_dims, double * restrict point_coord, 
-                      double min_dist, uint32_t * restrict closest_idx, double * restrict closest_dist);
+                      double min_dist, uint32_t k, uint32_t * restrict closest_idx, double * restrict closest_dist);
 void search_tree(Tree *tree, double * restrict pa, double * restrict point_coords, 
                  uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists);
 
@@ -431,7 +431,7 @@ Params:
     closest_dist : distance to closest point (return) 
 ************************************************/
 void search_leaf(double * restrict pa, uint32_t * restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double * restrict point_coord, 
-                 uint32_t * restrict closest_idx, double * restrict closest_dist)
+                 uint32_t k, uint32_t * restrict closest_idx, double * restrict closest_dist)
 {
     double cur_dist;
     /* Loop through all points in leaf */    
@@ -461,7 +461,7 @@ Params:
     closest_dist : distance to closest point (return) 
 ************************************************/
 void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx, int8_t no_dims, double * restrict point_coord, 
-                      double min_dist, uint32_t * restrict closest_idx, double * restrict closest_dist)
+                      double min_dist, uint32_t k, uint32_t * restrict closest_idx, double * restrict closest_dist)
 {
     int8_t dim;
     double dist_left, dist_right;
@@ -473,7 +473,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
     /* Handle leaf node */
     if (dim == -1)
     {
-        search_leaf(pa, pidx, no_dims, root->start_idx, root->n, point_coord, closest_idx, closest_dist);
+        search_leaf(pa, pidx, no_dims, root->start_idx, root->n, point_coord, k, closest_idx, closest_dist);
         return;
     }
     
@@ -487,7 +487,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
         if (dist_left < *closest_dist)
         {
             /* Search left subtree */ 
-            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, closest_idx, closest_dist);
+            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, closest_idx, closest_dist);
         }
         
         /* Right of cutting plane. Update minimum distance. Ref: D. Mount.*/
@@ -498,7 +498,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
 		if (dist_right < *closest_dist)
         {
             /* Search right subtree */ 
-            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, closest_idx, closest_dist);
+            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, closest_idx, closest_dist);
         }
     }
     else
@@ -508,7 +508,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
         if (dist_right < *closest_dist)
         {
             /* Search right subtree */ 
-            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, closest_idx, closest_dist);
+            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, closest_idx, closest_dist);
         }
         
         /* Left of cutting plane. Update minimum distance. Ref: D. Mount.*/
@@ -519,7 +519,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
 		if (dist_left < *closest_dist)
         {
             /* Search left subtree */ 
-            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, closest_idx, closest_dist);
+            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, closest_idx, closest_dist);
         }
     }
 }
@@ -531,9 +531,9 @@ Params:
     pa : data points
     pidx : permutation index of data points
     point_coords : query points
+    num_points : number of query points
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return) 
-    bbox : bounding box of data points
 ************************************************/
 void search_tree(Tree *tree, double * restrict pa, double * restrict point_coords, 
                  uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists)
@@ -553,11 +553,14 @@ void search_tree(Tree *tree, double * restrict pa, double * restrict point_coord
         #pragma omp for schedule(static, 100) nowait
         for (uint32_t i = 0; i < num_points; i++)
         {
-            closest_idxs[i] = UINT32_MAX;
-            closest_dists[i] = DBL_MAX;
+            for (uint32_t j = 0; j < k; j++)
+            {
+                closest_idxs[i * k + j] = UINT32_MAX;
+                closest_dists[i * k + j] = DBL_MAX;
+            }
             min_dist = get_min_dist(point_coords + no_dims * i, no_dims, bbox);
             search_splitnode(root, pa, pidx, no_dims, point_coords + no_dims * i, min_dist,
-                             &closest_idxs[i], &closest_dists[i]);
+                             k, &closest_idxs[i], &closest_dists[i]);
         }
     }
 }

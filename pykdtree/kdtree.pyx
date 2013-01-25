@@ -58,8 +58,8 @@ cdef class KDTree:
         
         cdef uint32_t num_qpoints = query_pts.shape[0]
         cdef uint32_t num_n = k
-        cdef np.ndarray[uint32_t, ndim=1] closest_idxs = np.empty(num_qpoints, dtype=np.uint32)
-        cdef np.ndarray[double, ndim=1] closest_dists = np.empty(num_qpoints, dtype=np.float)
+        cdef np.ndarray[uint32_t, ndim=1] closest_idxs = np.empty(num_qpoints * k, dtype=np.uint32)
+        cdef np.ndarray[double, ndim=1] closest_dists = np.empty(num_qpoints * k, dtype=np.float64)
         cdef uint32_t *closest_idxs_data = <uint32_t *>closest_idxs.data
         cdef double *closest_dists_data = <double *>closest_dists.data
     
