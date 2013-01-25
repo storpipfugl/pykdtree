@@ -484,7 +484,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
     {
         /* Left of cutting plane */
         dist_left = min_dist;
-        if (dist_left < *closest_dist)
+        if (dist_left < closest_dist[k - 1])
         {
             /* Search left subtree */ 
             search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, closest_idx, closest_dist);
@@ -495,7 +495,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
         if (box_diff < 0)			
 			box_diff = 0;
 		dist_right = min_dist - box_diff * box_diff + new_offset * new_offset;
-		if (dist_right < *closest_dist)
+		if (dist_right < closest_dist[k - 1])
         {
             /* Search right subtree */ 
             search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, closest_idx, closest_dist);
@@ -505,7 +505,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
     {
         /* Right of cutting plane */
         dist_right = min_dist;
-        if (dist_right < *closest_dist)
+        if (dist_right < closest_dist[k - 1])
         {
             /* Search right subtree */ 
             search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, closest_idx, closest_dist);
@@ -516,7 +516,7 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
         if (box_diff < 0)			
 			box_diff = 0;
 		dist_left = min_dist - box_diff * box_diff + new_offset * new_offset;
-		if (dist_left < *closest_dist)
+		if (dist_left < closest_dist[k - 1])
         {
             /* Search left subtree */ 
             search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, closest_idx, closest_dist);
@@ -560,7 +560,7 @@ void search_tree(Tree *tree, double * restrict pa, double * restrict point_coord
             }
             min_dist = get_min_dist(point_coords + no_dims * i, no_dims, bbox);
             search_splitnode(root, pa, pidx, no_dims, point_coords + no_dims * i, min_dist,
-                             k, &closest_idxs[i], &closest_dists[i]);
+                             k, &closest_idxs[i * k], &closest_dists[i * k]);
         }
     }
 }
