@@ -138,7 +138,7 @@ def test3d_8n():
                           [769957.188, -202418.125, 6321069.5]])
                           
     kdtree = KDTree(data_pts_real)
-    dist, idx = kdtree.query(query_pts, k=8)
+    dist, idx = kdtree.query(query_pts, k=8, sqr_dists=True)
     
     exp_dist = np.array([[  0.00000000e+00,   4.05250235e+03,   4.07389794e+03,   8.08201128e+03,
                             8.17063009e+03,   1.20904577e+04,   1.22902057e+04,   1.60775136e+04],
@@ -151,5 +151,6 @@ def test3d_8n():
                         [93, 94, 92, 95, 91, 96, 90, 97],
                         [45, 46, 44, 47, 43, 48, 42, 49]])
     assert np.array_equal(idx, exp_idx)
+    assert np.allclose(dist, exp_dist)
     
 

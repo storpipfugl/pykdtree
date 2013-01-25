@@ -26,6 +26,7 @@ typedef struct
     struct Node *root; 
 } Tree;
 
+void insert_point(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k);
 void get_bounding_box(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, double *bbox);
 int partition(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *bbox, int8_t *cut_dim, 
               double *cut_val, uint32_t *n_lo);
@@ -44,6 +45,27 @@ void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx
                       double min_dist, uint32_t k, uint32_t * restrict closest_idx, double * restrict closest_dist);
 void search_tree(Tree *tree, double * restrict pa, double * restrict point_coords, 
                  uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists);
+
+
+
+void insert_point(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k)
+{
+    int i;
+    for (i = k - 1; i > 0; i--)
+    {
+        if (closest_dist[i - 1] > cur_dist)
+        {
+            closest_dist[i] = closest_dist[i - 1];
+            closest_idx[i] = closest_idx[i - 1];
+        }
+        else 
+        {
+            break;
+        }
+    }
+    closest_idx[i] = pidx;
+    closest_dist[i] = cur_dist;
+}
 
 /************************************************
 Get the bounding box of a set of points
@@ -440,10 +462,11 @@ void search_leaf(double * restrict pa, uint32_t * restrict pidx, int8_t no_dims,
         /* Get distance to query point */
         cur_dist = calc_dist(&PA(start_idx + i, 0), point_coord, no_dims);
         /* Update closest info if new point is closest so far*/
-        if (cur_dist < *closest_dist)
+        if (cur_dist < closest_dist[k - 1])
         {
-            *closest_idx = pidx[start_idx + i];
-            *closest_dist = cur_dist;
+            insert_point(closest_idx, closest_dist, pidx[start_idx + i], cur_dist, k);
+            /* *closest_idx = pidx[start_idx + i];
+            *closest_dist = cur_dist; */
         }
     }
 }

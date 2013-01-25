@@ -66,10 +66,17 @@ cdef class KDTree:
         with nogil:
             search_tree(self._kdtree, self._data_array_data, query_array_data, num_qpoints, num_n, closest_idxs_data, closest_dists_data)
         
+        if k > 1:
+            closest_dists_res = closest_dists.reshape(num_qpoints, k)
+            closest_idxs_res = closest_idxs.reshape(num_qpoints, k)
+        else:
+            closest_dists_res = closest_dists
+            closest_idxs_res = closest_idxs
+            
         if sqr_dists:
-            return np.sqrt(closest_dists), closest_idxs
+            return np.sqrt(closest_dists_res), closest_idxs_res
         else:    
-            return closest_dists, closest_idxs
+            return closest_dists_res, closest_idxs_res
     
     def __dealloc__(KDTree self):
         if <int>(self._kdtree) == 0:
