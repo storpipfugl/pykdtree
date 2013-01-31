@@ -47,7 +47,15 @@ void search_tree(Tree *tree, double * restrict pa, double * restrict point_coord
                  uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists);
 
 
-
+/************************************************
+Insert point into priority queue
+Params:
+    closest_idx : index queue
+    closest_dist : distance queue
+    pidx : permutation index of data points
+    cur_dist : distance to point inserted
+    k : number of neighbours
+************************************************/
 void insert_point(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k)
 {
     int i;
