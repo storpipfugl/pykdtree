@@ -39,12 +39,12 @@ void print_tree(Node *root, int level);
 double calc_dist(double *point1_coord, double *point2_coord, int8_t no_dims);
 double get_cube_offset(int8_t dim, double *point_coord, double *bbox);
 double get_min_dist(double *point_coord, int8_t no_dims, double *bbox);
-void search_leaf(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *point_coord, 
-                 uint32_t k, uint32_t *closest_idx, double *closest_dist);
-void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx, int8_t no_dims, double * restrict point_coord, 
-                      double min_dist, uint32_t k, uint32_t * restrict closest_idx, double * restrict closest_dist);
-void search_tree(Tree *tree, double * restrict pa, double * restrict point_coords, 
-                 uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists);
+void search_leaf(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord, 
+                 uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist);
+void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
+                      double min_dist, uint32_t k, uint32_t *  closest_idx, double *closest_dist);
+void search_tree(Tree *tree, double *pa, double *point_coords, 
+                 uint32_t num_points, uint32_t k, uint32_t *closest_idxs, double *closest_dists);
 
 
 /************************************************
@@ -388,7 +388,7 @@ Params:
     point1_coord : point 1
     point2_coord : point 2
 ************************************************/
-double calc_dist(double * restrict point1_coord, double * restrict point2_coord, int8_t no_dims)
+double calc_dist(double *point1_coord, double *point2_coord, int8_t no_dims)
 {
     /* Calculate squared distance */    
     double dist = 0, dim_dist;
@@ -407,7 +407,7 @@ Params:
     point_coord : cartesian coordinates of point
     bbox : cube
 ************************************************/
-double get_cube_offset(int8_t dim, double * restrict point_coord, double * restrict bbox)
+double get_cube_offset(int8_t dim, double *point_coord, double *bbox)
 {
     double dim_coord = point_coord[dim];
     
@@ -435,7 +435,7 @@ Params:
     no_dims : number of dimensions
     bbox : cube
 ************************************************/
-double get_min_dist(double * restrict point_coord, int8_t no_dims, double * restrict bbox)
+double get_min_dist(double *point_coord, int8_t no_dims, double *bbox)
 {
     double cube_offset = 0, cube_offset_dim;
 
@@ -460,8 +460,8 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return) 
 ************************************************/
-void search_leaf(double * restrict pa, uint32_t * restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double * restrict point_coord, 
-                 uint32_t k, uint32_t * restrict closest_idx, double * restrict closest_dist)
+void search_leaf(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord, 
+                 uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist)
 {
     double cur_dist;
     /* Loop through all points in leaf */    
@@ -491,8 +491,8 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return) 
 ************************************************/
-void search_splitnode(Node *root, double * restrict pa, uint32_t * restrict pidx, int8_t no_dims, double * restrict point_coord, 
-                      double min_dist, uint32_t k, uint32_t * restrict closest_idx, double * restrict closest_dist)
+void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
+                      double min_dist, uint32_t k, uint32_t *closest_idx, double *closest_dist)
 {
     int8_t dim;
     double dist_left, dist_right;
@@ -566,8 +566,8 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return) 
 ************************************************/
-void search_tree(Tree *tree, double * restrict pa, double * restrict point_coords, 
-                 uint32_t num_points, uint32_t k, uint32_t * restrict closest_idxs, double * restrict closest_dists)
+void search_tree(Tree *tree, double *pa, double *point_coords, 
+                 uint32_t num_points, uint32_t k, uint32_t *closest_idxs, double *closest_dists)
 {
     double min_dist;
     int8_t no_dims = tree->no_dims;
