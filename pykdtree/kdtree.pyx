@@ -74,9 +74,14 @@ cdef class KDTree:
             closest_idxs_res = closest_idxs
             
         if sqr_dists:
-            return np.sqrt(closest_dists_res), closest_idxs_res
-        else:    
-            return closest_dists_res, closest_idxs_res
+            closest_dists_res = np.sqrt(closest_dists_res)
+
+        if distance_upper_bound is not None:
+            idx_out = (closest_dists_res > distance_upper_bound)
+            closest_dists_res[idx_out] = np.Inf
+            closest_idxs_res[idx_out] = self.n
+            
+        return closest_dists_res, closest_idxs_res
     
     def __dealloc__(KDTree self):
         if <int>(self._kdtree) == 0:
