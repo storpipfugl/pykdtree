@@ -124,7 +124,7 @@ def test3d():
                           
                           
     kdtree = KDTree(data_pts_real)
-    dist, idx = kdtree.query(query_pts)
+    dist, idx = kdtree.query(query_pts, sqr_dists=False)
 
     epsilon = 1e-5
     assert idx[0] == 7
@@ -140,7 +140,7 @@ def test3d_8n():
                           [769957.188, -202418.125, 6321069.5]])
                           
     kdtree = KDTree(data_pts_real)
-    dist, idx = kdtree.query(query_pts, k=8, sqr_dists=True)
+    dist, idx = kdtree.query(query_pts, k=8)
     
     exp_dist = np.array([[  0.00000000e+00,   4.05250235e+03,   4.07389794e+03,   8.08201128e+03,
                             8.17063009e+03,   1.20904577e+04,   1.22902057e+04,   1.60775136e+04],

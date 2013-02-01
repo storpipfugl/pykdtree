@@ -39,9 +39,13 @@ cdef class KDTree:
     cdef uint32_t leafsize
     
     def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=10):
+        
+        # Get data content
         cdef np.ndarray[double, ndim=1] data_array = np.ascontiguousarray(data_pts.ravel(), dtype=np.float64)
         self._data_array = data_array
         self._data_array_data = <double *>data_array.data
+        
+        # Get tree info
         self.n = <uint32_t>data_pts.shape[0]
         self.leafsize = <uint32_t>leafsize
         if data_pts.ndim == 1:
@@ -49,34 +53,46 @@ cdef class KDTree:
         else:
             self.ndim = <int8_t>data_pts.shape[1] 
         
+        # Release GIL and construct tree
         with nogil:
-            self._kdtree = construct_tree(self._data_array_data, self.ndim, self.n, self.leafsize) 
+            self._kdtree = construct_tree(self._data_array_data, self.ndim, 
+                                          self.n, self.leafsize) 
         
-    def query(KDTree self, np.ndarray query_pts not None, k=1, distance_upper_bound=None, sqr_dists=False):
+    def query(KDTree self, np.ndarray query_pts not None, k=1, 
+              distance_upper_bound=None, sqr_dists=True):
+                  
+        # Get query points data        
         cdef np.ndarray[double, ndim=1] query_array = np.ascontiguousarray(query_pts.ravel(), dtype=np.float64)
         cdef double *query_array_data = <double *>query_array.data
         
+        # Get query info
         cdef uint32_t num_qpoints = query_pts.shape[0]
         cdef uint32_t num_n = k
         cdef np.ndarray[uint32_t, ndim=1] closest_idxs = np.empty(num_qpoints * k, dtype=np.uint32)
         cdef np.ndarray[double, ndim=1] closest_dists = np.empty(num_qpoints * k, dtype=np.float64)
+                
+        # Set up return arrays
         cdef uint32_t *closest_idxs_data = <uint32_t *>closest_idxs.data
         cdef double *closest_dists_data = <double *>closest_dists.data
     
+        # Release GIL and query tree
         with nogil:
-            search_tree(self._kdtree, self._data_array_data, query_array_data, num_qpoints, num_n, closest_idxs_data, closest_dists_data)
+            search_tree(self._kdtree, self._data_array_data, 
+                        query_array_data, num_qpoints, num_n, 
+                        closest_idxs_data, closest_dists_data)
         
+        # Shape result
         if k > 1:
             closest_dists_res = closest_dists.reshape(num_qpoints, k)
             closest_idxs_res = closest_idxs.reshape(num_qpoints, k)
         else:
             closest_dists_res = closest_dists
             closest_idxs_res = closest_idxs
-            
-        if sqr_dists:
+    
+        if sqr_dists: # Return actual cartesian distances
             closest_dists_res = np.sqrt(closest_dists_res)
 
-        if distance_upper_bound is not None:
+        if distance_upper_bound is not None: # Mark out of bounds results
             idx_out = (closest_dists_res > distance_upper_bound)
             closest_dists_res[idx_out] = np.Inf
             closest_idxs_res[idx_out] = self.n
