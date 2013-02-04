@@ -26,7 +26,7 @@ cdef struct tree:
     
 
 cdef extern tree* construct_tree(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
-cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, uint32_t *closest_idxs, double *closest_dists) nogil
+cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, double distance_upper_bound, uint32_t *closest_idxs, double *closest_dists) nogil
 cdef extern void delete_tree(tree *kdtree)
 
 cdef class KDTree:
@@ -75,10 +75,17 @@ cdef class KDTree:
         cdef uint32_t *closest_idxs_data = <uint32_t *>closest_idxs.data
         cdef double *closest_dists_data = <double *>closest_dists.data
     
+        # Setup distance_upper_bound
+        cdef double dub
+        if distance_upper_bound is None:
+            dub = <double>np.finfo(np.float64).max    
+        else:
+            dub = <double>(distance_upper_bound * distance_upper_bound)
+            
         # Release GIL and query tree
         with nogil:
             search_tree(self._kdtree, self._data_array_data, 
-                        query_array_data, num_qpoints, num_n, 
+                        query_array_data, num_qpoints, num_n, dub, 
                         closest_idxs_data, closest_dists_data)
         
         # Shape result
@@ -88,14 +95,14 @@ cdef class KDTree:
         else:
             closest_dists_res = closest_dists
             closest_idxs_res = closest_idxs
-    
-        if sqr_dists: # Return actual cartesian distances
-            closest_dists_res = np.sqrt(closest_dists_res)
 
         if distance_upper_bound is not None: # Mark out of bounds results
-            idx_out = (closest_dists_res > distance_upper_bound)
+            idx_out = (closest_dists_res >= dub)
             closest_dists_res[idx_out] = np.Inf
             closest_idxs_res[idx_out] = self.n
+            
+        if sqr_dists: # Return actual cartesian distances
+            closest_dists_res = np.sqrt(closest_dists_res)
             
         return closest_dists_res, closest_idxs_res
     
