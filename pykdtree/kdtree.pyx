@@ -26,7 +26,7 @@ cdef struct tree:
     
 
 cdef extern tree* construct_tree(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
-cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, double distance_upper_bound, uint32_t *closest_idxs, double *closest_dists) nogil
+cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, double distance_upper_bound, double eps_fac, uint32_t *closest_idxs, double *closest_dists) nogil
 cdef extern void delete_tree(tree *kdtree)
 
 cdef class KDTree:
@@ -58,7 +58,7 @@ cdef class KDTree:
             self._kdtree = construct_tree(self._data_array_data, self.ndim, 
                                           self.n, self.leafsize) 
         
-    def query(KDTree self, np.ndarray query_pts not None, k=1, 
+    def query(KDTree self, np.ndarray query_pts not None, k=1, eps=0,
               distance_upper_bound=None, sqr_dists=True):
                   
         # Get query points data        
@@ -81,11 +81,14 @@ cdef class KDTree:
             dub = <double>np.finfo(np.float64).max    
         else:
             dub = <double>(distance_upper_bound * distance_upper_bound)
-            
+        
+        # Set epsilon        
+        cdef double epsilon = <double>eps        
+        
         # Release GIL and query tree
         with nogil:
             search_tree(self._kdtree, self._data_array_data, 
-                        query_array_data, num_qpoints, num_n, dub, 
+                        query_array_data, num_qpoints, num_n, dub, epsilon, 
                         closest_idxs_data, closest_dists_data)
         
         # Shape result

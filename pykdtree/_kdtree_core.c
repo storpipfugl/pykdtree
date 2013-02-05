@@ -42,9 +42,10 @@ double get_min_dist(double *point_coord, int8_t no_dims, double *bbox);
 void search_leaf(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord, 
                  uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist);
 void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
-                      double min_dist, uint32_t k, double distance_upper_bound, uint32_t *  closest_idx, double *closest_dist);
+                      double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint32_t *  closest_idx, double *closest_dist);
 void search_tree(Tree *tree, double *pa, double *point_coords, 
-                 uint32_t num_points, uint32_t k,  double distance_upper_bound, uint32_t *closest_idxs, double *closest_dists);
+                 uint32_t num_points, uint32_t k,  double distance_upper_bound, 
+                 double eps, uint32_t *closest_idxs, double *closest_dists);
 
 
 /************************************************
@@ -476,8 +477,6 @@ void search_leaf(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, u
         if (cur_dist < closest_dist[k - 1])
         {
             insert_point(closest_idx, closest_dist, pidx[start_idx + i], cur_dist, k);
-            /* *closest_idx = pidx[start_idx + i];
-            *closest_dist = cur_dist; */
         }
     }
 }
@@ -495,7 +494,7 @@ Params:
     closest_dist : distance to closest point (return) 
 ************************************************/
 void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
-                      double min_dist, uint32_t k, double distance_upper_bound, uint32_t *closest_idx, double *closest_dist)
+                      double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint32_t *closest_idx, double *closest_dist)
 {
     int8_t dim;
     double dist_left, dist_right;
@@ -524,10 +523,10 @@ void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, do
     {
         /* Left of cutting plane */
         dist_left = min_dist;
-        if (dist_left < closest_dist[k - 1])
+        if (dist_left < closest_dist[k - 1] * eps_fac)
         {
-            /* Search left subtree */ 
-            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, closest_idx, closest_dist);
+            /* Search left subtree if minimum distance is below limit */ 
+            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
         
         /* Right of cutting plane. Update minimum distance. Ref: D. Mount.*/
@@ -537,20 +536,20 @@ void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, do
 		box_diff = 0;
         }
         dist_right = min_dist - box_diff * box_diff + new_offset * new_offset;
-        if (dist_right < closest_dist[k - 1])
+        if (dist_right < closest_dist[k - 1] * eps_fac)
         {
-            /* Search right subtree */ 
-            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, closest_idx, closest_dist);
+            /* Search right subtree if minimum distance is below limit*/ 
+            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
     }
     else
     {
         /* Right of cutting plane */
         dist_right = min_dist;
-        if (dist_right < closest_dist[k - 1])
+        if (dist_right < closest_dist[k - 1] * eps_fac)
         {
-            /* Search right subtree */ 
-            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, closest_idx, closest_dist);
+            /* Search right subtree if minimum distance is below limit*/ 
+            search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
         
         /* Left of cutting plane. Update minimum distance. Ref: D. Mount.*/
@@ -560,10 +559,10 @@ void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, do
         	box_diff = 0;
         }
         dist_left = min_dist - box_diff * box_diff + new_offset * new_offset;
-	  if (dist_left < closest_dist[k - 1])
+	  if (dist_left < closest_dist[k - 1] * eps_fac)
         {
-            /* Search left subtree */ 
-            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, closest_idx, closest_dist);
+            /* Search left subtree if minimum distance is below limit*/ 
+            search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
     }
 }
@@ -581,9 +580,10 @@ Params:
 ************************************************/
 void search_tree(Tree *tree, double *pa, double *point_coords, 
                  uint32_t num_points, uint32_t k, double distance_upper_bound,
-                 uint32_t *closest_idxs, double *closest_dists)
+                 double eps, uint32_t *closest_idxs, double *closest_dists)
 {
     double min_dist;
+    double eps_fac = 1 / ((1 + eps) * (1 + eps));
     int8_t no_dims = tree->no_dims;
     double *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
@@ -605,7 +605,7 @@ void search_tree(Tree *tree, double *pa, double *point_coords,
             }
             min_dist = get_min_dist(point_coords + no_dims * i, no_dims, bbox);
             search_splitnode(root, pa, pidx, no_dims, point_coords + no_dims * i, min_dist,
-                             k, distance_upper_bound, &closest_idxs[i * k], &closest_dists[i * k]);
+                             k, distance_upper_bound, eps_fac, &closest_idxs[i * k], &closest_dists[i * k]);
         }
     }
 }
