@@ -25,7 +25,7 @@ try:
 except KeyError:
     use_omp = True
 
-# Custom builder to handler compiler flags
+# Custom builder to handler compiler flags. Edit if needed.
 class build_ext_subclass(build_ext):
     def build_extensions(self):
         comp = self.compiler.compiler_type 
@@ -55,7 +55,8 @@ setup(
     author_email='esn@dmi.dk',
     packages = ['pykdtree'],
     install_requires=['numpy'],
-    ext_modules = [Extension('pykdtree.kdtree', ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])], 
+    ext_modules = [Extension('pykdtree.kdtree', 
+                             ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])], 
     cmdclass = {'build_ext': build_ext_subclass },
     classifiers=[
       'Development Status :: 3 - Alpha',

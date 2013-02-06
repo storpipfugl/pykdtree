@@ -46,7 +46,7 @@ cdef extern void delete_tree(tree *kdtree)
 cdef class KDTree:
     """kd-tree for fast nearest-neighbour lookup.
     The interface is made to resemble the scipy.spatial kd-tree except
-    only Euclidean distance measure is allowed.
+    only Euclidean distance measure is supported.
     
     :Parameters:
     data_pts : numpy array
