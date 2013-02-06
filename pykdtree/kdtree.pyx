@@ -30,6 +30,16 @@ cdef extern void search_tree(tree *kdtree, double *pa, double *point_coords, uin
 cdef extern void delete_tree(tree *kdtree)
 
 cdef class KDTree:
+    """kd-tree for fast nearest-neighbour lookup.
+    The interface is made to resemble the scipy.spatial kd-tree except
+    only Euclidean distance measure is allowed.
+    
+    :Parameters:
+    data_pts : numpy array
+        Data points with shape (n , dims)
+    leafsize : int, optional
+        Maximum number of data points in tree leaf
+    """
 
     cdef tree *_kdtree
     cdef np.ndarray _data_array
@@ -39,6 +49,10 @@ cdef class KDTree:
     cdef uint32_t leafsize
     
     def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=10):
+
+        # Check arguments
+        if leafsize < 1:
+            raise ValueError('leafsize must be greater than zero')    
         
         # Get data content
         cdef np.ndarray[double, ndim=1] data_array = np.ascontiguousarray(data_pts.ravel(), dtype=np.float64)
@@ -59,8 +73,44 @@ cdef class KDTree:
                                           self.n, self.leafsize) 
         
     def query(KDTree self, np.ndarray query_pts not None, k=1, eps=0,
-              distance_upper_bound=None, sqr_dists=True):
-                  
+              distance_upper_bound=None, sqr_dists=False):
+        """Query the kd-tree for nearest neighbors
+
+        :Parameters:
+        query_pts : numpy array
+            Query points with shape (n , dims)
+        k : int
+            The number of nearest neighbours to return
+        eps : non-negative float
+            Return approximate nearest neighbours; the k-th returned value 
+            is guaranteed to be no further than (1 + eps) times the distance 
+            to the real k-th nearest neighbour
+        distance_upper_bound : non-negative float
+            Return only neighbors within this distance. 
+            This is used to prune tree searches.
+        sqr_dists : bool, optional
+            Internally pykdtree works with squared distances. 
+            Determines if the squared or Euclidean distances are returned.
+        """
+        
+        # Check arguments
+        if k < 1:
+            raise ValueError('Number of neighbours must be greater than zero')
+        elif eps < 0:
+            raise ValueError('eps must be non-negative')
+        elif distance_upper_bound is not None:
+            if distance_upper_bound < 0:
+                raise ValueError('distance_upper_bound must be non negative')
+        
+        # Check dimensions
+        if query_pts.ndim == 1:
+            q_ndim = 1
+        else:
+            q_ndim = query_pts.shape[1] 
+        
+        if self.ndim != q_ndim:
+            raise ValueError('Data and query points must have same dimensions')
+            
         # Get query points data        
         cdef np.ndarray[double, ndim=1] query_array = np.ascontiguousarray(query_pts.ravel(), dtype=np.float64)
         cdef double *query_array_data = <double *>query_array.data
@@ -104,7 +154,7 @@ cdef class KDTree:
             closest_dists_res[idx_out] = np.Inf
             closest_idxs_res[idx_out] = self.n
             
-        if sqr_dists: # Return actual cartesian distances
+        if not sqr_dists: # Return actual cartesian distances
             closest_dists_res = np.sqrt(closest_dists_res)
             
         return closest_dists_res, closest_idxs_res
