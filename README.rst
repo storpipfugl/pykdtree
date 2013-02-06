@@ -5,7 +5,9 @@ pykdtree
 Objective
 ---------
 pykdtree is a kd-tree implementation for fast nearest neighbour search.
-The aim is to provide a more efficient implementation than the scipy.spatial.cKDTree and libANN by combining the best features from both and focus on implementation efficiency.
+The aim is to be the fastest implementation around for common use cases (low dimensions and low number of neighbours).
+
+The implementation is based on scipy.spatial.cKDTree and libANN by combining the best features from both and focus on implementation efficiency.
 
 The interface is similar to that of scipy.spatial.cKDTree except only Euclidean distance measure is supported.
 

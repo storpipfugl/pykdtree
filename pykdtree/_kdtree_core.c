@@ -17,6 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+This kd-tree implementation is based on the scipy.spatial.cKDTree by
+Anne M. Archibald and libANN by David M. Mount and Sunil Arya.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -135,7 +140,8 @@ void get_bounding_box(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, do
 }
 
 /************************************************
-Partition a range of data points by manipulation the permutation index
+Partition a range of data points by manipulation the permutation index.
+The sliding midpoint rule is used for the partitioning.
 Params:
     pa : data points
     pidx : permutation index of data points
@@ -548,7 +554,9 @@ void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, do
             search_splitnode((Node *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
         
-        /* Right of cutting plane. Update minimum distance. Ref: D. Mount.*/
+        /* Right of cutting plane. Update minimum distance. 
+           See Algorithms for Fast Vector Quantization
+           Sunil Arya and David M. Mount. */
         box_diff = root->cut_bounds_lv - point_coord[dim];
         if (box_diff < 0)
         {			
@@ -571,7 +579,9 @@ void search_splitnode(Node *root, double *pa, uint32_t *pidx, int8_t no_dims, do
             search_splitnode((Node *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
         
-        /* Left of cutting plane. Update minimum distance. Ref: D. Mount.*/
+        /* Left of cutting plane. Update minimum distance.
+           See Algorithms for Fast Vector Quantization
+           Sunil Arya and David M. Mount. */
         box_diff = point_coord[dim] - root->cut_bounds_hv;
         if (box_diff < 0)
         {			
