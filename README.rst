@@ -40,3 +40,11 @@ The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to it
     
 The number of threads to be used in OpenMP enabled queries can be controlled with the standard OpenMP environment variable OMP_NUM_THREADS.
 
+Test
+----
+Run the unit tests using nosetest
+
+.. code-block:: bash
+
+    $ cd <pykdtree_dir>
+    $ python setup.py nosetests
