@@ -62,6 +62,9 @@ cdef class KDTree:
     cdef int8_t ndim
     cdef uint32_t leafsize
     
+    def __cinit__(KDTree self):    
+        self._kdtree = NULL
+        
     def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=10):
 
         # Check arguments
@@ -174,7 +177,7 @@ cdef class KDTree:
         return closest_dists_res, closest_idxs_res
     
     def __dealloc__(KDTree self):
-        if <int>(self._kdtree) == 0:
+        if self._kdtree == NULL:
             # should happen only if __init__ was never called
             return
         delete_tree(self._kdtree)
