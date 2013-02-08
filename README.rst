@@ -34,7 +34,7 @@ Building without OpenMP support is controlled by the USE_OMP environment variabl
 
 Usage
 -----
-The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to it's documentation
+The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to its documentation
 
     >>> from pykdtree.kdtree import KDTree
     >>> kd_tree = KDTree(data_pts)
