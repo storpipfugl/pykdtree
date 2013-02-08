@@ -65,13 +65,13 @@ Total 8 neighbours                   2293     929       545                 293
 
 Looking at the combined construction and query this gives the following performance improvement relative to scipy.spatial.cKDTree
 
-=========  ======  ========  ==================
-Neigbours  libANN  pykdtree  pykdtree 4 threads
----------  ------  --------  ------------------
+==========  ======  ========  ==================
+Neighbours  libANN  pykdtree  pykdtree 4 threads
+----------  ------  --------  ------------------
 1            129%      329%                723%                  
 
 8            147%      320%                682%         
-=========  ======  ========  ==================
+==========  ======  ========  ==================
 
 Note: mileage will vary with the dataset at hand and computer architecture. 
 
