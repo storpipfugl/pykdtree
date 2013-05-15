@@ -133,7 +133,28 @@ def test3d():
     assert dist[0] == 0
     assert abs(dist[1] - 3.) < epsilon * dist[1]
     assert abs(dist[2] - 20001.) < epsilon * dist[2]
+
+def test3d_float32():
+
     
+    #7, 93, 45    
+    query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
+                          [751763.125, -59925.969, 6326205.5],
+                          [769957.188, -202418.125, 6321069.5]], dtype=np.float32)
+                          
+                          
+    kdtree = KDTree(data_pts_real.astype(np.float32))
+    dist, idx = kdtree.query(query_pts, sqr_dists=True)
+    print kdtree.data_pts.dtype, dist[0]
+    epsilon = 1e-5
+    assert idx[0] == 7
+    assert idx[1] == 93
+    assert idx[2] == 45
+    assert dist[0] == 0
+    assert abs(dist[1] - 3.) < epsilon * dist[1]
+    assert abs(dist[2] - 20001.) < epsilon * dist[2]
+    assert kdtree.data_pts.dtype == np.float32
+     
 def test3d_8n():
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
@@ -152,6 +173,7 @@ def test3d_8n():
     exp_idx = np.array([[ 7,  8,  6,  9,  5, 10,  4, 11],
                         [93, 94, 92, 95, 91, 96, 90, 97],
                         [45, 46, 44, 47, 43, 48, 42, 49]])
+    print idx
     assert np.array_equal(idx, exp_idx)
     assert np.allclose(dist, exp_dist)
 
@@ -173,7 +195,8 @@ def test3d_8n_ub():
     exp_idx = np.array([[ 7,  8,  6,  9,  5, n,  n, n],
                         [93, 94, 92, 95, 91, 96, 90, n],
                         [45, 46, 44, 47, 43, 48, n, n]])
-    
+   
+    print idx
     assert np.array_equal(idx, exp_idx)
     assert np.allclose(dist, exp_dist)
     
