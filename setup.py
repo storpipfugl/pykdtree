@@ -49,7 +49,7 @@ class build_ext_subclass(build_ext):
         
 setup(
     name='pykdtree',
-    version=0.1,
+    version=0.2,
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     author='Esben S. Nielsen',
     author_email='esn@dmi.dk',
