@@ -18,6 +18,7 @@
 import os
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
+import numpy
 
 # Get OpenMP setting from environment  
 try:
@@ -49,14 +50,15 @@ class build_ext_subclass(build_ext):
         
 setup(
     name='pykdtree',
-    version=0.2,
+    version=0.1,
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     author='Esben S. Nielsen',
     author_email='esn@dmi.dk',
     packages = ['pykdtree'],
     install_requires=['numpy'],
     ext_modules = [Extension('pykdtree.kdtree', 
-                             ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])], 
+                             ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'],
+                             include_dirs=[numpy.get_include()])], 
     cmdclass = {'build_ext': build_ext_subclass },
     classifiers=[
       'Development Status :: 3 - Alpha',
