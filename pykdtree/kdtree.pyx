@@ -87,12 +87,12 @@ cdef class KDTree:
         self._kdtree_float = NULL
         self._kdtree_double = NULL
         
-    def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=10):
-
+    def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=16):
+        
         # Check arguments
         if leafsize < 1:
             raise ValueError('leafsize must be greater than zero')    
-       
+        
         # Get data content
         cdef np.ndarray[float, ndim=1] data_array_float
         cdef np.ndarray[double, ndim=1] data_array_double
