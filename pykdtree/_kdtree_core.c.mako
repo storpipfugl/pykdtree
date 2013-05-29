@@ -63,7 +63,7 @@ int partition_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, uint32_t st
               ${DTYPE} *cut_val, uint32_t *n_lo);
 Tree_${DTYPE}* construct_tree_${DTYPE}(${DTYPE} *pa, int8_t no_dims, uint32_t n, uint32_t bsp);
 Node_${DTYPE}* construct_subtree_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, ${DTYPE} *bbox);
-Node_${DTYPE} * create_node_${DTYPE}(uint32_t start_idx, uint32_t n);
+Node_${DTYPE} * create_node_${DTYPE}(uint32_t start_idx, uint32_t n, int is_leaf);
 void delete_subtree_${DTYPE}(Node_${DTYPE} *root);
 void delete_tree_${DTYPE}(Tree_${DTYPE} *tree);
 void print_tree_${DTYPE}(Node_${DTYPE} *root, int level);
@@ -287,8 +287,9 @@ Params:
 Node_${DTYPE}* construct_subtree_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, ${DTYPE} *bbox)
 {
     /* Create new node */
-    Node_${DTYPE} *root = create_node_${DTYPE}(start_idx, n);
-    if (n <= bsp)
+    int is_leaf = (n <= bsp);
+    Node_${DTYPE} *root = create_node_${DTYPE}(start_idx, n, is_leaf);
+    if (is_leaf)
     {   
         /* Make leaf node */
         root->cut_dim = -1;     
@@ -369,9 +370,17 @@ Params:
     start_idx : index of first data point to use
     n :  number of data points    
 ************************************************/
-Node_${DTYPE}* create_node_${DTYPE}(uint32_t start_idx, uint32_t n)
+Node_${DTYPE}* create_node_${DTYPE}(uint32_t start_idx, uint32_t n, int is_leaf)
 {
-    Node_${DTYPE} *new_node = (Node_${DTYPE} *)malloc(sizeof(Node_${DTYPE}));
+    Node_${DTYPE} *new_node; 
+    if (is_leaf)
+    {
+        new_node = (Node_${DTYPE} *)malloc(sizeof(Node_${DTYPE}) - 2 * sizeof(Node_${DTYPE} *));
+    }
+    else
+    {
+        new_node = (Node_${DTYPE} *)malloc(sizeof(Node_${DTYPE}));
+    }
     new_node->n = n;
     new_node->start_idx = start_idx;
     return new_node;

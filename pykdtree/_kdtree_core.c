@@ -81,7 +81,7 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
               float *cut_val, uint32_t *n_lo);
 Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t bsp);
 Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, float *bbox);
-Node_float * create_node_float(uint32_t start_idx, uint32_t n);
+Node_float * create_node_float(uint32_t start_idx, uint32_t n, int is_leaf);
 void delete_subtree_float(Node_float *root);
 void delete_tree_float(Tree_float *tree);
 void print_tree_float(Node_float *root, int level);
@@ -103,7 +103,7 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
               double *cut_val, uint32_t *n_lo);
 Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp);
 Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, double *bbox);
-Node_double * create_node_double(uint32_t start_idx, uint32_t n);
+Node_double * create_node_double(uint32_t start_idx, uint32_t n, int is_leaf);
 void delete_subtree_double(Node_double *root);
 void delete_tree_double(Tree_double *tree);
 void print_tree_double(Node_double *root, int level);
@@ -325,8 +325,9 @@ Params:
 Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, float *bbox)
 {
     /* Create new node */
-    Node_float *root = create_node_float(start_idx, n);
-    if (n <= bsp)
+    int is_leaf = (n <= bsp);
+    Node_float *root = create_node_float(start_idx, n, is_leaf);
+    if (is_leaf)
     {   
         /* Make leaf node */
         root->cut_dim = -1;     
@@ -407,9 +408,17 @@ Params:
     start_idx : index of first data point to use
     n :  number of data points    
 ************************************************/
-Node_float* create_node_float(uint32_t start_idx, uint32_t n)
+Node_float* create_node_float(uint32_t start_idx, uint32_t n, int is_leaf)
 {
-    Node_float *new_node = (Node_float *)malloc(sizeof(Node_float));
+    Node_float *new_node; 
+    if (is_leaf)
+    {
+        new_node = (Node_float *)malloc(sizeof(Node_float) - 2 * sizeof(Node_float *));
+    }
+    else
+    {
+        new_node = (Node_float *)malloc(sizeof(Node_float));
+    }
     new_node->n = n;
     new_node->start_idx = start_idx;
     return new_node;
@@ -892,8 +901,9 @@ Params:
 Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, double *bbox)
 {
     /* Create new node */
-    Node_double *root = create_node_double(start_idx, n);
-    if (n <= bsp)
+    int is_leaf = (n <= bsp);
+    Node_double *root = create_node_double(start_idx, n, is_leaf);
+    if (is_leaf)
     {   
         /* Make leaf node */
         root->cut_dim = -1;     
@@ -974,9 +984,17 @@ Params:
     start_idx : index of first data point to use
     n :  number of data points    
 ************************************************/
-Node_double* create_node_double(uint32_t start_idx, uint32_t n)
+Node_double* create_node_double(uint32_t start_idx, uint32_t n, int is_leaf)
 {
-    Node_double *new_node = (Node_double *)malloc(sizeof(Node_double));
+    Node_double *new_node; 
+    if (is_leaf)
+    {
+        new_node = (Node_double *)malloc(sizeof(Node_double) - 2 * sizeof(Node_double *));
+    }
+    else
+    {
+        new_node = (Node_double *)malloc(sizeof(Node_double));
+    }
     new_node->n = n;
     new_node->start_idx = start_idx;
     return new_node;
