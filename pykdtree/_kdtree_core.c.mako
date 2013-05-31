@@ -375,6 +375,11 @@ Node_${DTYPE}* create_node_${DTYPE}(uint32_t start_idx, uint32_t n, int is_leaf)
     Node_${DTYPE} *new_node; 
     if (is_leaf)
     {
+        /*
+            Allocate only the part of the struct that will be used in a leaf node.
+            This relies on the C99 specification of struct layout conservation and padding and 
+            that dereferencing is never attempted for the node pointers in a leaf.
+        */
         new_node = (Node_${DTYPE} *)malloc(sizeof(Node_${DTYPE}) - 2 * sizeof(Node_${DTYPE} *));
     }
     else
