@@ -61,7 +61,7 @@ setup(
                              include_dirs=[numpy.get_include()])], 
     cmdclass = {'build_ext': build_ext_subclass },
     classifiers=[
-      'Development Status :: 3 - Alpha',
+      'Development Status :: 4 - Beta',
       'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
       'Programming Language :: Python',
       'Operating System :: OS Independent',
