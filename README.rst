@@ -38,7 +38,7 @@ The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to it
 
     >>> from pykdtree.kdtree import KDTree
     >>> kd_tree = KDTree(data_pts)
-    >>> dist, idx = pkd_tree.query(query_pts, k=8)
+    >>> dist, idx = kd_tree.query(query_pts, k=8)
     
 The number of threads to be used in OpenMP enabled queries can be controlled with the standard OpenMP environment variable OMP_NUM_THREADS.
 
