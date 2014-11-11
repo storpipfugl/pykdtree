@@ -56,6 +56,7 @@ setup(
     author_email='esn@dmi.dk',
     packages = ['pykdtree'],
     install_requires=['numpy'],
+    zip_safe=False,
     ext_modules = [Extension('pykdtree.kdtree', 
                              ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'],
                              include_dirs=[numpy.get_include()])], 
