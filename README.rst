@@ -45,7 +45,7 @@ The number of threads to be used in OpenMP enabled queries can be controlled wit
 The **leafsize** argument (number of data points per leaf) for the tree creation can be used to control the memory overhead of the kd-tree. pykdtree uses a default **leafsize=16**. 
 Increasing **leafsize** will reduce the memory overhead and construction time but increase query time.    
 
-pykdtree accepts data in double precision (numpy.float64) og single precision (numpy.float32) floating point. If data of another type is used an internal copy in double precision is made resulting in a memory overhead. If the kd-tree is constructed on single precision data the query points must be single precision as well.
+pykdtree accepts data in double precision (numpy.float64) or single precision (numpy.float32) floating point. If data of another type is used an internal copy in double precision is made resulting in a memory overhead. If the kd-tree is constructed on single precision data the query points must be single precision as well.
 
 Benchmarks
 ----------

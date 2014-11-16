@@ -50,19 +50,20 @@ class build_ext_subclass(build_ext):
         
 setup(
     name='pykdtree',
-    version=0.2,
+    version='0.3',
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     author='Esben S. Nielsen',
     author_email='esn@dmi.dk',
     packages = ['pykdtree'],
     install_requires=['numpy'],
     zip_safe=False,
+    test_suite = 'nose.collector',
     ext_modules = [Extension('pykdtree.kdtree', 
                              ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'],
                              include_dirs=[numpy.get_include()])], 
     cmdclass = {'build_ext': build_ext_subclass },
     classifiers=[
-      'Development Status :: 4 - Beta',
+      'Development Status :: 5 - Production/Stable',
       'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
       'Programming Language :: Python',
       'Operating System :: OS Independent',
