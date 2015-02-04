@@ -1,19 +1,19 @@
 #pykdtree, Fast kd-tree implementation with OpenMP-enabled queries
 # 
-#Copyright (C) 2013  Esben S. Nielsen
+#Copyright (C) 2013 - present  Esben S. Nielsen
 #
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
 #(at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Lesser General Public License along
+# with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 from setuptools import setup, Extension
@@ -50,10 +50,10 @@ class build_ext_subclass(build_ext):
         
 setup(
     name='pykdtree',
-    version='0.3',
+    version='1.0',
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     author='Esben S. Nielsen',
-    author_email='esn@dmi.dk',
+    author_email='storpipfugl@gmail.com',
     packages = ['pykdtree'],
     install_requires=['numpy'],
     zip_safe=False,

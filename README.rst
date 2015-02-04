@@ -91,6 +91,8 @@ Run the unit tests using nosetest
 
 Changelog
 ---------
+v1.0 : Switched license from GPLv3 to LGPLv3
+
 v0.3 : Avoid zipping of installed egg
 
 v0.2 : Reduced memory footprint. Can now handle single precision data internally avoiding copy conversion to double precision. Default leafsize changed from 10 to 16 as this reduces the memory footprint and makes it a cache line multiplum (negligible if any query performance observed in benchmarks). Reduced memory allocation for leaf nodes. Applied patch for building on OS X.
