@@ -68,6 +68,7 @@ setup(
     packages = ['pykdtree'],
     install_requires=['numpy'],
     setup_requires=['numpy'],
+    tests_require=['nose'],
     zip_safe=False,
     test_suite = 'nose.collector',
     ext_modules = [Extension('pykdtree.kdtree', 
