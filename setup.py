@@ -18,7 +18,6 @@
 import os
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-import numpy
 
 # Get OpenMP setting from environment  
 try:
@@ -46,6 +45,18 @@ class build_ext_subclass(build_ext):
         self.extensions[0].extra_compile_args = extra_compile_args
         self.extensions[0].extra_link_args = extra_link_args
         build_ext.build_extensions(self)
+
+    def finalize_options(self):
+        '''
+        In order to avoid premature import of numpy before it gets installed as a dependency
+        get numpy include directories during the extensions building process
+	http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py
+        '''
+        build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        __builtins__.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
  
         
 setup(
@@ -56,11 +67,12 @@ setup(
     author_email='storpipfugl@gmail.com',
     packages = ['pykdtree'],
     install_requires=['numpy'],
+    setup_requires=['numpy'],
+    tests_require=['nose'],
     zip_safe=False,
     test_suite = 'nose.collector',
     ext_modules = [Extension('pykdtree.kdtree', 
-                             ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'],
-                             include_dirs=[numpy.get_include()])], 
+                             ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
     cmdclass = {'build_ext': build_ext_subclass },
     classifiers=[
       'Development Status :: 5 - Production/Stable',
