@@ -77,6 +77,7 @@ cdef class KDTree:
     cdef tree_float *_kdtree_float 
     cdef tree_double *_kdtree_double
     cdef readonly np.ndarray data_pts
+    cdef readonly np.ndarray data
     cdef float *_data_pts_data_float
     cdef double *_data_pts_data_double
     cdef readonly uint32_t n
@@ -106,6 +107,9 @@ cdef class KDTree:
             self._data_pts_data_double = <double *>data_array_double.data
             self.data_pts = data_array_double
         
+        # scipy interface compatibility
+        self.data = self.data_pts
+
         # Get tree info
         self.n = <uint32_t>data_pts.shape[0]
         self.leafsize = <uint32_t>leafsize

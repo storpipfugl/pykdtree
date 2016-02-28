@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/storpipfugl/pykdtree.svg?branch=master
+    :target: https://travis-ci.org/storpipfugl/pykdtree
+
 ========
 pykdtree
 ========
