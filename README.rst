@@ -94,6 +94,8 @@ Run the unit tests using nosetest
 
 Changelog
 ---------
+v1.1 : Build process improvements. Add data attribute to kdtree class for scipy interface compatibility
+
 v1.0 : Switched license from GPLv3 to LGPLv3
 
 v0.3 : Avoid zipping of installed egg
