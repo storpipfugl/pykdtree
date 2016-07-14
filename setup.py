@@ -39,8 +39,7 @@ class build_ext_subclass(build_ext):
                 extra_link_args = []
         else:
             # Add support for more compilers here
-            raise ValueError(('Compiler flags undefined for %s.', 
-                             'Please modify setup.py and add compiler flags')
+            raise ValueError('Compiler flags undefined for %s. Please modify setup.py and add compiler flags'
                              % comp)
         self.extensions[0].extra_compile_args = extra_compile_args
         self.extensions[0].extra_link_args = extra_link_args
