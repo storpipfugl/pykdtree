@@ -37,6 +37,9 @@ class build_ext_subclass(build_ext):
             else:
                 extra_compile_args = ['-std=c99', '-O3']
                 extra_link_args = []
+        elif comp == "msvc":
+            extra_compile_args = []
+            extra_link_args = []
         else:
             # Add support for more compilers here
             raise ValueError('Compiler flags undefined for %s. Please modify setup.py and add compiler flags'
