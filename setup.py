@@ -38,8 +38,10 @@ class build_ext_subclass(build_ext):
                 extra_compile_args = ['-std=c99', '-O3']
                 extra_link_args = []
         elif comp == "msvc":
-            extra_compile_args = []
+            extra_compile_args = ["/Ox"]
             extra_link_args = []
+            if use_omp:
+                extra_compile_args.append("/openmp")
         else:
             # Add support for more compilers here
             raise ValueError('Compiler flags undefined for %s. Please modify setup.py and add compiler flags'
