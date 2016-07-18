@@ -62,7 +62,7 @@ install:
   # target Python version and architecture
   - "conda update --yes conda"
   - "conda config --add channels https://conda.anaconda.org/ioos"
-  - "conda create -q --yes -n test python=%PYTHON_VERSION% base numpy nose"
+  - "conda create -q --yes -n test python=%PYTHON_VERSION% numpy nose"
   - "activate test"
   - "pip install coveralls"
   - "where python"
