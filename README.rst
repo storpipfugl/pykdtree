@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/storpipfugl/pykdtree.svg?branch=master
+    :target: https://travis-ci.org/storpipfugl/pykdtree
+
 ========
 pykdtree
 ========
@@ -38,14 +41,14 @@ The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to it
 
     >>> from pykdtree.kdtree import KDTree
     >>> kd_tree = KDTree(data_pts)
-    >>> dist, idx = pkd_tree.query(query_pts, k=8)
+    >>> dist, idx = kd_tree.query(query_pts, k=8)
     
 The number of threads to be used in OpenMP enabled queries can be controlled with the standard OpenMP environment variable OMP_NUM_THREADS.
 
 The **leafsize** argument (number of data points per leaf) for the tree creation can be used to control the memory overhead of the kd-tree. pykdtree uses a default **leafsize=16**. 
 Increasing **leafsize** will reduce the memory overhead and construction time but increase query time.    
 
-pykdtree accepts data in double precision (numpy.float64) og single precision (numpy.float32) floating point. If data of another type is used an internal copy in double precision is made resulting in a memory overhead. If the kd-tree is constructed on single precision data the query points must be single precision as well.
+pykdtree accepts data in double precision (numpy.float64) or single precision (numpy.float32) floating point. If data of another type is used an internal copy in double precision is made resulting in a memory overhead. If the kd-tree is constructed on single precision data the query points must be single precision as well.
 
 Benchmarks
 ----------
@@ -91,6 +94,14 @@ Run the unit tests using nosetest
 
 Changelog
 ---------
-v0.2 : Reduced memory footprint. Can now handle single precision data internally avoiding copy conversion to double precision. Default leafsize changed from 10 to 16 as this reduces the memory footprint and makes it a cache line multiplum (negligible if any query performance observed in benchmarks). Reduced memory allocation for leaf nodes. 
+v1.1.1 : Same as v1.0 release due to incorrect pypi release
+
+v1.1 : Build process improvements. Add data attribute to kdtree class for scipy interface compatibility
+
+v1.0 : Switched license from GPLv3 to LGPLv3
+
+v0.3 : Avoid zipping of installed egg
+
+v0.2 : Reduced memory footprint. Can now handle single precision data internally avoiding copy conversion to double precision. Default leafsize changed from 10 to 16 as this reduces the memory footprint and makes it a cache line multiplum (negligible if any query performance observed in benchmarks). Reduced memory allocation for leaf nodes. Applied patch for building on OS X.
 
 v0.1 : Initial version.

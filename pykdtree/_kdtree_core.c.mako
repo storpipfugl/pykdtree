@@ -1,20 +1,20 @@
 /*
 pykdtree, Fast kd-tree implementation with OpenMP-enabled queries
  
-Copyright (C) 2013  Esben S. Nielsen
+Copyright (C) 2013 - present  Esben S. Nielsen
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU Lesser General Public License along
+with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
@@ -30,6 +30,10 @@ Anne M. Archibald and libANN by David M. Mount and Sunil Arya.
 
 #define PA(i,d)			(pa[no_dims * pidx[i] + d])
 #define PASWAP(a,b) { uint32_t tmp = pidx[a]; pidx[a] = pidx[b]; pidx[b] = tmp; }
+
+#ifdef _MSC_VER
+#define restrict __restrict
+#endif
 
 % for DTYPE in ['float', 'double']:
 
@@ -122,21 +126,22 @@ Params:
 void get_bounding_box_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, ${DTYPE} *bbox)
 {
     ${DTYPE} cur;
-    int8_t bbox_idx;
+    int8_t bbox_idx, i, j;
+    uint32_t i2;
 
     /* Use first data point to initialize */
-    for (int8_t i = 0; i < no_dims; i++)
+    for (i = 0; i < no_dims; i++)
     {
         bbox[2 * i] = bbox[2 * i + 1] = PA(0, i);
     }
 
     /* Update using rest of data points */
-    for (uint32_t i = 1; i < n; i++)
+    for (i2 = 1; i2 < n; i2++)
     {
-        for (int8_t j = 0; j < no_dims; j++)
+        for (j = 0; j < no_dims; j++)
         {
             bbox_idx = 2 * j;
-            cur = PA(i, j);
+            cur = PA(i2, j);
             if (cur < bbox[bbox_idx])
             {
                 bbox[bbox_idx] = cur;
@@ -165,13 +170,13 @@ Params:
 ************************************************/
 int partition_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, ${DTYPE} *bbox, int8_t *cut_dim, ${DTYPE} *cut_val, uint32_t *n_lo)
 {
-    int8_t dim = 0;
-    uint32_t p, q;
+    int8_t dim = 0, i;
+    uint32_t p, q, i2;
     ${DTYPE} size = 0, min_val, max_val, split, side_len, cur_val;
     uint32_t end_idx = start_idx + n - 1;
     
     /* Find largest bounding box side */
-    for (int8_t i = 0; i < no_dims; i++)
+    for (i = 0; i < no_dims; i++)
     {
         side_len = bbox[2 * i + 1] - bbox[2 * i];
         if (side_len > size)
@@ -230,13 +235,13 @@ int partition_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, uint32_t st
         
         uint32_t j = start_idx;
         split = PA(j, dim);
-        for (uint32_t i = start_idx + 1; i <= end_idx; i++) 
+        for (i2 = start_idx + 1; i2 <= end_idx; i2++) 
         {
             /* Find lowest point */
-            cur_val = PA(i, dim); 
+            cur_val = PA(i2, dim); 
             if (cur_val < split)
             {
-                j = i;
+                j = i2;
                 split = cur_val;
             }
         }
@@ -252,13 +257,13 @@ int partition_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, uint32_t st
         
         uint32_t j = end_idx;
         split = PA(j, dim);
-        for (uint32_t i = start_idx; i < end_idx; i++)
+        for (i2 = start_idx; i2 < end_idx; i2++)
         {
             /* Find highest point */
-            cur_val = PA(i, dim);
+            cur_val = PA(i2, dim);
             if (cur_val > split)
             {
-                j = i;
+                j = i2;
                 split = cur_val;
             }    
         }
@@ -289,6 +294,10 @@ Node_${DTYPE}* construct_subtree_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t n
     /* Create new node */
     int is_leaf = (n <= bsp);
     Node_${DTYPE} *root = create_node_${DTYPE}(start_idx, n, is_leaf);
+    int rval;
+    int8_t cut_dim;
+    uint32_t n_lo;
+    ${DTYPE} cut_val, lv, hv;
     if (is_leaf)
     {   
         /* Make leaf node */
@@ -297,11 +306,6 @@ Node_${DTYPE}* construct_subtree_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t n
     else
     {
         /* Make split node */
-        int rval;
-        int8_t cut_dim;
-        uint32_t n_lo;
-        ${DTYPE}  cut_val;
-        
         /* Partition data set and set node info */
         rval = partition_${DTYPE}(pa, pidx, no_dims, start_idx, n, bbox, &cut_dim, &cut_val, &n_lo);
         if (rval == 1)
@@ -313,8 +317,8 @@ Node_${DTYPE}* construct_subtree_${DTYPE}(${DTYPE} *pa, uint32_t *pidx, int8_t n
         root->cut_dim = cut_dim; 
         
         /* Recurse on both subsets */
-        ${DTYPE} lv = bbox[2 * cut_dim];
-        ${DTYPE} hv = bbox[2 * cut_dim + 1];
+        lv = bbox[2 * cut_dim];
+        hv = bbox[2 * cut_dim + 1];
         
         /* Set bounds for cut dimension */
         root->cut_bounds_lv = lv;
@@ -344,16 +348,20 @@ Params:
 Tree_${DTYPE}* construct_tree_${DTYPE}(${DTYPE} *pa, int8_t no_dims, uint32_t n, uint32_t bsp)
 {
     Tree_${DTYPE} *tree = (Tree_${DTYPE} *)malloc(sizeof(Tree_${DTYPE}));
+    uint32_t i;
+    uint32_t *pidx;
+    ${DTYPE} *bbox;
+    
     tree->no_dims = no_dims;
     
     /* Initialize permutation array */
-    uint32_t *pidx = (uint32_t *)malloc(sizeof(uint32_t) * n);
-    for (uint32_t i = 0; i < n; i++)
+    pidx = (uint32_t *)malloc(sizeof(uint32_t) * n);
+    for (i = 0; i < n; i++)
     {
         pidx[i] = i;
     }
     
-    ${DTYPE} *bbox = (${DTYPE} *)malloc(2 * sizeof(${DTYPE}) * no_dims);
+    bbox = (${DTYPE} *)malloc(2 * sizeof(${DTYPE}) * no_dims);
     get_bounding_box_${DTYPE}(pa, pidx, no_dims, n, bbox);
     tree->bbox = bbox;
 
@@ -424,7 +432,8 @@ Print
 ************************************************/
 void print_tree_${DTYPE}(Node_${DTYPE} *root, int level)
 {
-    for (int i = 0; i < level; i++)
+    int i;
+    for (i = 0; i < level; i++)
     {
         printf(" ");
     }
@@ -445,7 +454,8 @@ ${DTYPE} calc_dist_${DTYPE}(${DTYPE} *point1_coord, ${DTYPE} *point2_coord, int8
 {
     /* Calculate squared distance */    
     ${DTYPE} dist = 0, dim_dist;
-    for (int8_t i = 0; i < no_dims; i++)
+    int8_t i;
+    for (i = 0; i < no_dims; i++)
     {
         dim_dist = point2_coord[i] - point1_coord[i];
         dist += dim_dist * dim_dist;
@@ -491,8 +501,9 @@ Params:
 ${DTYPE} get_min_dist_${DTYPE}(${DTYPE} *point_coord, int8_t no_dims, ${DTYPE} *bbox)
 {
     ${DTYPE} cube_offset = 0, cube_offset_dim;
+    int8_t i;
 
-    for (int8_t i = 0; i < no_dims; i++)
+    for (i = 0; i < no_dims; i++)
     {
         cube_offset_dim = get_cube_offset_${DTYPE}(i, point_coord, bbox);
         cube_offset += cube_offset_dim * cube_offset_dim; 
@@ -517,8 +528,9 @@ void search_leaf_${DTYPE}(${DTYPE} *restrict pa, uint32_t *restrict pidx, int8_t
                  uint32_t k, uint32_t *restrict closest_idx, ${DTYPE} *restrict closest_dist)
 {
     ${DTYPE} cur_dist;
+    uint32_t i;
     /* Loop through all points in leaf */    
-    for (uint32_t i = 0; i < n; i++)
+    for (i = 0; i < n; i++)
     {
         /* Get distance to query point */
         cur_dist = calc_dist_${DTYPE}(&PA(start_idx + i, 0), point_coord, no_dims);
@@ -640,6 +652,7 @@ void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coo
     int8_t no_dims = tree->no_dims;
     ${DTYPE} *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
+    uint32_t i, j;
     Node_${DTYPE} *root = (Node_${DTYPE} *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -649,9 +662,9 @@ void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coo
            for spatial coherent query datasets
         */
         #pragma omp for schedule(static, 100) nowait
-        for (uint32_t i = 0; i < num_points; i++)
+        for (i = 0; i < num_points; i++)
         {
-            for (uint32_t j = 0; j < k; j++)
+            for (j = 0; j < k; j++)
             {
                 closest_idxs[i * k + j] = UINT32_MAX;
                 closest_dists[i * k + j] = DBL_MAX;
