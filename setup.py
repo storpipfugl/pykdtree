@@ -37,11 +37,11 @@ class build_ext_subclass(build_ext):
             else:
                 extra_compile_args = ['-std=c99', '-O3']
                 extra_link_args = []
-        elif comp == "msvc":
-            extra_compile_args = ["/Ox"]
+        elif comp == 'msvc':
+            extra_compile_args = ['/Ox']
             extra_link_args = []
             if use_omp:
-                extra_compile_args.append("/openmp")
+                extra_compile_args.append('/openmp')
         else:
             # Add support for more compilers here
             raise ValueError('Compiler flags undefined for %s. Please modify setup.py and add compiler flags'
@@ -65,7 +65,7 @@ class build_ext_subclass(build_ext):
         
 setup(
     name='pykdtree',
-    version='1.1.1',
+    version='1.2.0',
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     author='Esben S. Nielsen',
     author_email='storpipfugl@gmail.com',

@@ -35,6 +35,12 @@ Building without OpenMP support is controlled by the USE_OMP environment variabl
     $ export USE_OMP=0
     $ python setup.py install
 
+Note evironment variables are by default not exported when using sudo so in this case do
+
+.. code-block:: bash
+
+    $ USE_OMP=0 sudo -E python setup.py install
+
 Usage
 -----
 The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to its documentation
@@ -94,7 +100,9 @@ Run the unit tests using nosetest
 
 Changelog
 ---------
-v1.1.1 : Same as v1.0 release due to incorrect pypi release
+v1.2.0 : 64 and 32 bit MSVC Windows support added
+
+v1.1.1 : Same as v1.1 release due to incorrect pypi release
 
 v1.1 : Build process improvements. Add data attribute to kdtree class for scipy interface compatibility
 
