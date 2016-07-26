@@ -269,6 +269,26 @@ def test3d_8n_ub_eps():
     assert np.array_equal(idx, exp_idx)
     assert np.allclose(dist, exp_dist)
 
+def test3d_large_query():
+    #7, 93, 45
+    query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
+                          [751763.125, -59925.969, 6326205.5],
+                          [769957.188, -202418.125, 6321069.5]])
+
+    # repeat the same points multiple times to get 450 query points
+    query_pts = np.repeat(query_pts, 150, axis=0)
+
+    kdtree = KDTree(data_pts_real)
+    dist, idx = kdtree.query(query_pts, sqr_dists=True)
+
+    epsilon = 1e-5
+    assert np.all(idx[:150] == 7)
+    assert np.all(idx[150:300] == 93)
+    assert np.all(idx[300:] == 45)
+    assert np.all(dist[:150] == 0)
+    assert np.all(abs(dist[150:300] - 3.) < epsilon * dist[150:300])
+    assert np.all(abs(dist[300:] - 20001.) < epsilon * dist[300:])
+
 def test_scipy_comp():
     
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
