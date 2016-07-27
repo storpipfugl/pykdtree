@@ -100,6 +100,8 @@ Run the unit tests using nosetest
 
 Changelog
 ---------
+v1.2.1 : Fixed OpenMP thread safety issue introduced in v1.2.0
+
 v1.2.0 : 64 and 32 bit MSVC Windows support added
 
 v1.1.1 : Same as v1.1 release due to incorrect pypi release
