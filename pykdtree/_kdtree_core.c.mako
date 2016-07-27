@@ -661,7 +661,7 @@ void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coo
         /* The low chunk size is important to avoid L2 cache trashing  
            for spatial coherent query datasets
         */
-        #pragma omp for schedule(static, 100) nowait
+        #pragma omp for private(i, j) schedule(static, 100) nowait
         for (i = 0; i < num_points; i++)
         {
             for (j = 0; j < k; j++)
