@@ -270,12 +270,12 @@ def test3d_8n_ub_eps():
     assert np.allclose(dist, exp_dist)
 
 def test3d_large_query():
-    #7, 93, 45
+    # Target idxs: 7, 93, 45
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]])
 
-    # repeat the same points multiple times to get 450 query points
+    # Repeat the same points multiple times to get 60000 query points
     n = 20000
     query_pts = np.repeat(query_pts, n, axis=0)
 
