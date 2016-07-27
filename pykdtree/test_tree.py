@@ -276,18 +276,19 @@ def test3d_large_query():
                           [769957.188, -202418.125, 6321069.5]])
 
     # repeat the same points multiple times to get 450 query points
-    query_pts = np.repeat(query_pts, 150, axis=0)
+    n = 20000
+    query_pts = np.repeat(query_pts, n, axis=0)
 
     kdtree = KDTree(data_pts_real)
     dist, idx = kdtree.query(query_pts, sqr_dists=True)
 
     epsilon = 1e-5
-    assert np.all(idx[:150] == 7)
-    assert np.all(idx[150:300] == 93)
-    assert np.all(idx[300:] == 45)
-    assert np.all(dist[:150] == 0)
-    assert np.all(abs(dist[150:300] - 3.) < epsilon * dist[150:300])
-    assert np.all(abs(dist[300:] - 20001.) < epsilon * dist[300:])
+    assert np.all(idx[:n] == 7)
+    assert np.all(idx[n:2*n] == 93)
+    assert np.all(idx[2*n:] == 45)
+    assert np.all(dist[:n] == 0)
+    assert np.all(abs(dist[n:2*n] - 3.) < epsilon * dist[n:2*n])
+    assert np.all(abs(dist[2*n:] - 20001.) < epsilon * dist[2*n:])
 
 def test_scipy_comp():
     
