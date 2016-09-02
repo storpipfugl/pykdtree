@@ -98,6 +98,29 @@ Run the unit tests using nosetest
     $ cd <pykdtree_dir>
     $ python setup.py nosetests
 
+Installing on AppVeyor
+----------------------
+
+Pykdtree requires the "stdint.h" header file which is not available on certain
+versions of Windows or certain Windows compilers including those on the
+continuous integration platform AppVeyor. To get around this the header file(s)
+can be downloaded and placed in the correct "include" directory. This can
+be done by adding the `anaconda/missing-headers.ps1` script to your repository
+and running it the install step of `appveyor.yml`:
+
+    # install missing headers that aren't included with MSVC 2008
+    # https://github.com/omnia-md/conda-recipes/pull/524
+    - "powershell ./appveyor/missing-headers.ps1"
+
+In addition to this, AppVeyor does not support OpenMP so this feature must be
+turned off by adding the following to `appveyor.yml` in the
+`environment` section:
+
+    environment:
+      global:
+        # Don't build with openmp because it isn't supported in appveyor's compilers
+        USE_OMP: "0"
+
 Changelog
 ---------
 v1.2.0 : 64 and 32 bit MSVC Windows support added
