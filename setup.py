@@ -25,6 +25,14 @@ try:
 except KeyError:
     use_omp = True
 
+
+def set_builtin(name, value):
+    if isinstance(__builtins__, dict):
+        __builtins__[name] = value
+    else:
+        setattr(__builtins__, name, value)
+
+
 # Custom builder to handler compiler flags. Edit if needed.
 class build_ext_subclass(build_ext):
     def build_extensions(self):
@@ -54,11 +62,11 @@ class build_ext_subclass(build_ext):
         '''
         In order to avoid premature import of numpy before it gets installed as a dependency
         get numpy include directories during the extensions building process
-	http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py
+        http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py
         '''
         build_ext.finalize_options(self)
         # Prevent numpy from thinking it is still in its setup process:
-        __builtins__.__NUMPY_SETUP__ = False
+        set_builtin('__NUMPY_SETUP__', False)
         import numpy
         self.include_dirs.append(numpy.get_include())
  
