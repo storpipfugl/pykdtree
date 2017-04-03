@@ -652,7 +652,7 @@ void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coo
     int8_t no_dims = tree->no_dims;
     ${DTYPE} *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    uint32_t i, j;
+    int32_t i, j;
     Node_${DTYPE} *root = (Node_${DTYPE} *)tree->root;
 
     /* Queries are OpenMP enabled */
