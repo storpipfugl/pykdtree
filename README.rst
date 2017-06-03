@@ -125,6 +125,8 @@ turned off by adding the following to `appveyor.yml` in the
 
 Changelog
 ---------
+v1.2.2 : Build process fixes
+
 v1.2.1 : Fixed OpenMP thread safety issue introduced in v1.2.0
 
 v1.2.0 : 64 and 32 bit MSVC Windows support added
