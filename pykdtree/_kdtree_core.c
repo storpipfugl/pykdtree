@@ -1,6 +1,6 @@
 /*
 pykdtree, Fast kd-tree implementation with OpenMP-enabled queries
- 
+
 Copyright (C) 2013 - present  Esben S. Nielsen
 
 This program is free software: you can redistribute it and/or modify it under
@@ -53,7 +53,7 @@ typedef struct
     float *bbox;
     int8_t no_dims;
     uint32_t *pidx;
-    struct Node_float *root; 
+    struct Node_float *root;
 } Tree_float;
 
 
@@ -74,14 +74,14 @@ typedef struct
     double *bbox;
     int8_t no_dims;
     uint32_t *pidx;
-    struct Node_double *root; 
+    struct Node_double *root;
 } Tree_double;
 
 
 
 void insert_point_float(uint32_t *closest_idx, float *closest_dist, uint32_t pidx, float cur_dist, uint32_t k);
 void get_bounding_box_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, float *bbox);
-int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *bbox, int8_t *cut_dim, 
+int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *bbox, int8_t *cut_dim,
               float *cut_val, uint32_t *n_lo);
 Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t bsp);
 Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, float *bbox);
@@ -92,18 +92,18 @@ void print_tree_float(Node_float *root, int level);
 float calc_dist_float(float *point1_coord, float *point2_coord, int8_t no_dims);
 float get_cube_offset_float(int8_t dim, float *point_coord, float *bbox);
 float get_min_dist_float(float *point_coord, int8_t no_dims, float *bbox);
-void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord, 
+void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
                  uint32_t k, uint32_t *restrict closest_idx, float *restrict closest_dist);
-void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord, 
+void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord,
                       float min_dist, uint32_t k, float distance_upper_bound, float eps_fac, uint32_t *  closest_idx, float *closest_dist);
-void search_tree_float(Tree_float *tree, float *pa, float *point_coords, 
-                 uint32_t num_points, uint32_t k,  float distance_upper_bound, 
+void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
+                 uint32_t num_points, uint32_t k,  float distance_upper_bound,
                  float eps, uint32_t *closest_idxs, float *closest_dists);
 
 
 void insert_point_double(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k);
 void get_bounding_box_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, double *bbox);
-int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *bbox, int8_t *cut_dim, 
+int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *bbox, int8_t *cut_dim,
               double *cut_val, uint32_t *n_lo);
 Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp);
 Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, double *bbox);
@@ -114,12 +114,12 @@ void print_tree_double(Node_double *root, int level);
 double calc_dist_double(double *point1_coord, double *point2_coord, int8_t no_dims);
 double get_cube_offset_double(int8_t dim, double *point_coord, double *bbox);
 double get_min_dist_double(double *point_coord, int8_t no_dims, double *bbox);
-void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord, 
+void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
                  uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist);
-void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
+void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord,
                       double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint32_t *  closest_idx, double *closest_dist);
-void search_tree_double(Tree_double *tree, double *pa, double *point_coords, 
-                 uint32_t num_points, uint32_t k,  double distance_upper_bound, 
+void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
+                 uint32_t num_points, uint32_t k,  double distance_upper_bound,
                  double eps, uint32_t *closest_idxs, double *closest_dists);
 
 
@@ -143,7 +143,7 @@ void insert_point_float(uint32_t *closest_idx, float *closest_dist, uint32_t pid
             closest_dist[i] = closest_dist[i - 1];
             closest_idx[i] = closest_idx[i - 1];
         }
-        else 
+        else
         {
             break;
         }
@@ -204,7 +204,7 @@ Params:
     bbox : bounding box of data points
     cut_dim : dimension used for partition (return)
     cut_val : value of cutting point (return)
-    n_lo : number of point below cutting plane (return)    
+    n_lo : number of point below cutting plane (return)
 ************************************************/
 int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *bbox, int8_t *cut_dim, float *cut_val, uint32_t *n_lo)
 {
@@ -212,7 +212,7 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
     uint32_t p, q, i2;
     float size = 0, min_val, max_val, split, side_len, cur_val;
     uint32_t end_idx = start_idx + n - 1;
-    
+
     /* Find largest bounding box side */
     for (i = 0; i < no_dims; i++)
     {
@@ -223,17 +223,17 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
             size = side_len;
         }
     }
-    
+
     min_val = bbox[2 * dim];
     max_val = bbox[2 * dim + 1];
-    
+
     /* Check for zero length or inconsistent */
     if (min_val >= max_val)
         return 1;
-    
-    /* Use middle for splitting */    
+
+    /* Use middle for splitting */
     split = (min_val + max_val) / 2;
-    
+
     /* Partition all data points around middle */
     p = start_idx;
     q = end_idx;
@@ -246,37 +246,37 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
         else if (PA(q, dim) >= split)
         {
             /* Guard for underflow */
-            if (q > 0) 
+            if (q > 0)
             {
                 q--;
             }
             else
             {
-                break; 
-            }   
+                break;
+            }
         }
         else
         {
             PASWAP(p, q);
             p++;
-            q--;    
-        } 
+            q--;
+        }
     }
 
     /* Check for empty splits */
     if (p == start_idx)
     {
-        /* No points less than split. 
+        /* No points less than split.
            Split at lowest point instead.
            Minimum 1 point will be in lower box.
         */
-        
+
         uint32_t j = start_idx;
         split = PA(j, dim);
-        for (i2 = start_idx + 1; i2 <= end_idx; i2++) 
+        for (i2 = start_idx + 1; i2 <= end_idx; i2++)
         {
             /* Find lowest point */
-            cur_val = PA(i2, dim); 
+            cur_val = PA(i2, dim);
             if (cur_val < split)
             {
                 j = i2;
@@ -288,11 +288,11 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
     }
     else if (p == end_idx + 1)
     {
-        /* No points greater than split. 
+        /* No points greater than split.
            Split at highest point instead.
            Minimum 1 point will be in higher box.
         */
-        
+
         uint32_t j = end_idx;
         split = PA(j, dim);
         for (i2 = start_idx; i2 < end_idx; i2++)
@@ -303,12 +303,12 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
             {
                 j = i2;
                 split = cur_val;
-            }    
+            }
         }
         PASWAP(j, end_idx);
-        p = end_idx;    
+        p = end_idx;
     }
-    
+
     /* Set return values */
     *cut_dim = dim;
     *cut_val = split;
@@ -337,9 +337,9 @@ Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, u
     uint32_t n_lo;
     float cut_val, lv, hv;
     if (is_leaf)
-    {   
+    {
         /* Make leaf node */
-        root->cut_dim = -1;     
+        root->cut_dim = -1;
     }
     else
     {
@@ -349,30 +349,30 @@ Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, u
         if (rval == 1)
         {
             root->cut_dim = -1;
-            return root;         
+            return root;
         }
         root->cut_val = cut_val;
-        root->cut_dim = cut_dim; 
-        
+        root->cut_dim = cut_dim;
+
         /* Recurse on both subsets */
         lv = bbox[2 * cut_dim];
         hv = bbox[2 * cut_dim + 1];
-        
+
         /* Set bounds for cut dimension */
         root->cut_bounds_lv = lv;
         root->cut_bounds_hv = hv;
-        
+
         /* Update bounding box before call to lower subset and restore after */
         bbox[2 * cut_dim + 1] = cut_val;
-        root->left_child = (struct Node_float *)construct_subtree_float(pa, pidx, no_dims, start_idx, n_lo, bsp, bbox); 
+        root->left_child = (struct Node_float *)construct_subtree_float(pa, pidx, no_dims, start_idx, n_lo, bsp, bbox);
         bbox[2 * cut_dim + 1] = hv;
-        
+
         /* Update bounding box before call to higher subset and restore after */
         bbox[2 * cut_dim] = cut_val;
-        root->right_child = (struct Node_float *)construct_subtree_float(pa, pidx, no_dims, start_idx + n_lo, n - n_lo, bsp, bbox); 
-        bbox[2 * cut_dim] = lv;   
+        root->right_child = (struct Node_float *)construct_subtree_float(pa, pidx, no_dims, start_idx + n_lo, n - n_lo, bsp, bbox);
+        bbox[2 * cut_dim] = lv;
     }
-    return root;    
+    return root;
 }
 
 /************************************************
@@ -389,16 +389,16 @@ Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t
     uint32_t i;
     uint32_t *pidx;
     float *bbox;
-    
+
     tree->no_dims = no_dims;
-    
+
     /* Initialize permutation array */
     pidx = (uint32_t *)malloc(sizeof(uint32_t) * n);
     for (i = 0; i < n; i++)
     {
         pidx[i] = i;
     }
-    
+
     bbox = (float *)malloc(2 * sizeof(float) * no_dims);
     get_bounding_box_float(pa, pidx, no_dims, n, bbox);
     tree->bbox = bbox;
@@ -414,16 +414,16 @@ Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t
 Create a tree node.
 Params:
     start_idx : index of first data point to use
-    n :  number of data points    
+    n :  number of data points
 ************************************************/
 Node_float* create_node_float(uint32_t start_idx, uint32_t n, int is_leaf)
 {
-    Node_float *new_node; 
+    Node_float *new_node;
     if (is_leaf)
     {
         /*
             Allocate only the part of the struct that will be used in a leaf node.
-            This relies on the C99 specification of struct layout conservation and padding and 
+            This relies on the C99 specification of struct layout conservation and padding and
             that dereferencing is never attempted for the node pointers in a leaf.
         */
         new_node = (Node_float *)malloc(sizeof(Node_float) - 2 * sizeof(Node_float *));
@@ -490,7 +490,7 @@ Params:
 ************************************************/
 float calc_dist_float(float *point1_coord, float *point2_coord, int8_t no_dims)
 {
-    /* Calculate squared distance */    
+    /* Calculate squared distance */
     float dist = 0, dim_dist;
     int8_t i;
     for (i = 0; i < no_dims; i++)
@@ -511,11 +511,11 @@ Params:
 float get_cube_offset_float(int8_t dim, float *point_coord, float *bbox)
 {
     float dim_coord = point_coord[dim];
-    
+
     if (dim_coord < bbox[2 * dim])
     {
         /* Left of cube in dimension */
-        return dim_coord - bbox[2 * dim];  
+        return dim_coord - bbox[2 * dim];
     }
     else if (dim_coord > bbox[2 * dim + 1])
     {
@@ -526,7 +526,7 @@ float get_cube_offset_float(int8_t dim, float *point_coord, float *bbox)
     {
         /* Inside cube in dimension */
         return 0.;
-    }    
+    }
 }
 
 /************************************************
@@ -544,7 +544,7 @@ float get_min_dist_float(float *point_coord, int8_t no_dims, float *bbox)
     for (i = 0; i < no_dims; i++)
     {
         cube_offset_dim = get_cube_offset_float(i, point_coord, bbox);
-        cube_offset += cube_offset_dim * cube_offset_dim; 
+        cube_offset += cube_offset_dim * cube_offset_dim;
     }
 
     return cube_offset;
@@ -555,19 +555,19 @@ Search a leaf node for closest point
 Params:
     pa : data points
     pidx : permutation index of data points
-    no_dims : number of dimensions    
+    no_dims : number of dimensions
     start_idx : index of first data point to use
     size :  number of data points
     point_coord : query point
     closest_idx : index of closest data point found (return)
-    closest_dist : distance to closest point (return) 
+    closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord, 
+void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
                  uint32_t k, uint32_t *restrict closest_idx, float *restrict closest_dist)
 {
     float cur_dist;
     uint32_t i;
-    /* Loop through all points in leaf */    
+    /* Loop through all points in leaf */
     for (i = 0; i < n; i++)
     {
         /* Get distance to query point */
@@ -590,16 +590,16 @@ Params:
     point_coord : query point
     min_dist : minumum distance to nearest neighbour
     closest_idx : index of closest data point found (return)
-    closest_dist : distance to closest point (return) 
+    closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord, 
+void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord,
                       float min_dist, uint32_t k, float distance_upper_bound, float eps_fac, uint32_t *closest_idx, float *closest_dist)
 {
     int8_t dim;
     float dist_left, dist_right;
     float new_offset;
     float box_diff;
-    
+
     /* Skip if distance bound exeeded */
     if (min_dist > distance_upper_bound)
     {
@@ -607,39 +607,39 @@ void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t 
     }
 
     dim = root->cut_dim;
-    
+
     /* Handle leaf node */
     if (dim == -1)
     {
         search_leaf_float(pa, pidx, no_dims, root->start_idx, root->n, point_coord, k, closest_idx, closest_dist);
         return;
     }
-    
+
     /* Get distance to cutting plane */
     new_offset = point_coord[dim] - root->cut_val;
-    
+
     if (new_offset < 0)
     {
         /* Left of cutting plane */
         dist_left = min_dist;
         if (dist_left < closest_dist[k - 1] * eps_fac)
         {
-            /* Search left subtree if minimum distance is below limit */ 
+            /* Search left subtree if minimum distance is below limit */
             search_splitnode_float((Node_float *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
-        
-        /* Right of cutting plane. Update minimum distance. 
+
+        /* Right of cutting plane. Update minimum distance.
            See Algorithms for Fast Vector Quantization
            Sunil Arya and David M. Mount. */
         box_diff = root->cut_bounds_lv - point_coord[dim];
         if (box_diff < 0)
-        {			
+        {
 		box_diff = 0;
         }
         dist_right = min_dist - box_diff * box_diff + new_offset * new_offset;
         if (dist_right < closest_dist[k - 1] * eps_fac)
         {
-            /* Search right subtree if minimum distance is below limit*/ 
+            /* Search right subtree if minimum distance is below limit*/
             search_splitnode_float((Node_float *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
     }
@@ -649,22 +649,22 @@ void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t 
         dist_right = min_dist;
         if (dist_right < closest_dist[k - 1] * eps_fac)
         {
-            /* Search right subtree if minimum distance is below limit*/ 
+            /* Search right subtree if minimum distance is below limit*/
             search_splitnode_float((Node_float *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
-        
+
         /* Left of cutting plane. Update minimum distance.
            See Algorithms for Fast Vector Quantization
            Sunil Arya and David M. Mount. */
         box_diff = point_coord[dim] - root->cut_bounds_hv;
         if (box_diff < 0)
-        {			
+        {
         	box_diff = 0;
         }
         dist_left = min_dist - box_diff * box_diff + new_offset * new_offset;
 	  if (dist_left < closest_dist[k - 1] * eps_fac)
         {
-            /* Search left subtree if minimum distance is below limit*/ 
+            /* Search left subtree if minimum distance is below limit*/
             search_splitnode_float((Node_float *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
     }
@@ -679,9 +679,9 @@ Params:
     point_coords : query points
     num_points : number of query points
     closest_idx : index of closest data point found (return)
-    closest_dist : distance to closest point (return) 
+    closest_dist : distance to closest point (return)
 ************************************************/
-void search_tree_float(Tree_float *tree, float *pa, float *point_coords, 
+void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
                  uint32_t num_points, uint32_t k, float distance_upper_bound,
                  float eps, uint32_t *closest_idxs, float *closest_dists)
 {
@@ -690,13 +690,13 @@ void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
     int8_t no_dims = tree->no_dims;
     float *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    uint32_t i, j;
+    int32_t i, j;
     Node_float *root = (Node_float *)tree->root;
 
     /* Queries are OpenMP enabled */
     #pragma omp parallel
     {
-        /* The low chunk size is important to avoid L2 cache trashing  
+        /* The low chunk size is important to avoid L2 cache trashing
            for spatial coherent query datasets
         */
         #pragma omp for private(i, j) schedule(static, 100) nowait
@@ -733,7 +733,7 @@ void insert_point_double(uint32_t *closest_idx, double *closest_dist, uint32_t p
             closest_dist[i] = closest_dist[i - 1];
             closest_idx[i] = closest_idx[i - 1];
         }
-        else 
+        else
         {
             break;
         }
@@ -794,7 +794,7 @@ Params:
     bbox : bounding box of data points
     cut_dim : dimension used for partition (return)
     cut_val : value of cutting point (return)
-    n_lo : number of point below cutting plane (return)    
+    n_lo : number of point below cutting plane (return)
 ************************************************/
 int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *bbox, int8_t *cut_dim, double *cut_val, uint32_t *n_lo)
 {
@@ -802,7 +802,7 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
     uint32_t p, q, i2;
     double size = 0, min_val, max_val, split, side_len, cur_val;
     uint32_t end_idx = start_idx + n - 1;
-    
+
     /* Find largest bounding box side */
     for (i = 0; i < no_dims; i++)
     {
@@ -813,17 +813,17 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
             size = side_len;
         }
     }
-    
+
     min_val = bbox[2 * dim];
     max_val = bbox[2 * dim + 1];
-    
+
     /* Check for zero length or inconsistent */
     if (min_val >= max_val)
         return 1;
-    
-    /* Use middle for splitting */    
+
+    /* Use middle for splitting */
     split = (min_val + max_val) / 2;
-    
+
     /* Partition all data points around middle */
     p = start_idx;
     q = end_idx;
@@ -836,37 +836,37 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
         else if (PA(q, dim) >= split)
         {
             /* Guard for underflow */
-            if (q > 0) 
+            if (q > 0)
             {
                 q--;
             }
             else
             {
-                break; 
-            }   
+                break;
+            }
         }
         else
         {
             PASWAP(p, q);
             p++;
-            q--;    
-        } 
+            q--;
+        }
     }
 
     /* Check for empty splits */
     if (p == start_idx)
     {
-        /* No points less than split. 
+        /* No points less than split.
            Split at lowest point instead.
            Minimum 1 point will be in lower box.
         */
-        
+
         uint32_t j = start_idx;
         split = PA(j, dim);
-        for (i2 = start_idx + 1; i2 <= end_idx; i2++) 
+        for (i2 = start_idx + 1; i2 <= end_idx; i2++)
         {
             /* Find lowest point */
-            cur_val = PA(i2, dim); 
+            cur_val = PA(i2, dim);
             if (cur_val < split)
             {
                 j = i2;
@@ -878,11 +878,11 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
     }
     else if (p == end_idx + 1)
     {
-        /* No points greater than split. 
+        /* No points greater than split.
            Split at highest point instead.
            Minimum 1 point will be in higher box.
         */
-        
+
         uint32_t j = end_idx;
         split = PA(j, dim);
         for (i2 = start_idx; i2 < end_idx; i2++)
@@ -893,12 +893,12 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
             {
                 j = i2;
                 split = cur_val;
-            }    
+            }
         }
         PASWAP(j, end_idx);
-        p = end_idx;    
+        p = end_idx;
     }
-    
+
     /* Set return values */
     *cut_dim = dim;
     *cut_val = split;
@@ -927,9 +927,9 @@ Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims
     uint32_t n_lo;
     double cut_val, lv, hv;
     if (is_leaf)
-    {   
+    {
         /* Make leaf node */
-        root->cut_dim = -1;     
+        root->cut_dim = -1;
     }
     else
     {
@@ -939,30 +939,30 @@ Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims
         if (rval == 1)
         {
             root->cut_dim = -1;
-            return root;         
+            return root;
         }
         root->cut_val = cut_val;
-        root->cut_dim = cut_dim; 
-        
+        root->cut_dim = cut_dim;
+
         /* Recurse on both subsets */
         lv = bbox[2 * cut_dim];
         hv = bbox[2 * cut_dim + 1];
-        
+
         /* Set bounds for cut dimension */
         root->cut_bounds_lv = lv;
         root->cut_bounds_hv = hv;
-        
+
         /* Update bounding box before call to lower subset and restore after */
         bbox[2 * cut_dim + 1] = cut_val;
-        root->left_child = (struct Node_double *)construct_subtree_double(pa, pidx, no_dims, start_idx, n_lo, bsp, bbox); 
+        root->left_child = (struct Node_double *)construct_subtree_double(pa, pidx, no_dims, start_idx, n_lo, bsp, bbox);
         bbox[2 * cut_dim + 1] = hv;
-        
+
         /* Update bounding box before call to higher subset and restore after */
         bbox[2 * cut_dim] = cut_val;
-        root->right_child = (struct Node_double *)construct_subtree_double(pa, pidx, no_dims, start_idx + n_lo, n - n_lo, bsp, bbox); 
-        bbox[2 * cut_dim] = lv;   
+        root->right_child = (struct Node_double *)construct_subtree_double(pa, pidx, no_dims, start_idx + n_lo, n - n_lo, bsp, bbox);
+        bbox[2 * cut_dim] = lv;
     }
-    return root;    
+    return root;
 }
 
 /************************************************
@@ -979,16 +979,16 @@ Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint3
     uint32_t i;
     uint32_t *pidx;
     double *bbox;
-    
+
     tree->no_dims = no_dims;
-    
+
     /* Initialize permutation array */
     pidx = (uint32_t *)malloc(sizeof(uint32_t) * n);
     for (i = 0; i < n; i++)
     {
         pidx[i] = i;
     }
-    
+
     bbox = (double *)malloc(2 * sizeof(double) * no_dims);
     get_bounding_box_double(pa, pidx, no_dims, n, bbox);
     tree->bbox = bbox;
@@ -1004,16 +1004,16 @@ Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint3
 Create a tree node.
 Params:
     start_idx : index of first data point to use
-    n :  number of data points    
+    n :  number of data points
 ************************************************/
 Node_double* create_node_double(uint32_t start_idx, uint32_t n, int is_leaf)
 {
-    Node_double *new_node; 
+    Node_double *new_node;
     if (is_leaf)
     {
         /*
             Allocate only the part of the struct that will be used in a leaf node.
-            This relies on the C99 specification of struct layout conservation and padding and 
+            This relies on the C99 specification of struct layout conservation and padding and
             that dereferencing is never attempted for the node pointers in a leaf.
         */
         new_node = (Node_double *)malloc(sizeof(Node_double) - 2 * sizeof(Node_double *));
@@ -1080,7 +1080,7 @@ Params:
 ************************************************/
 double calc_dist_double(double *point1_coord, double *point2_coord, int8_t no_dims)
 {
-    /* Calculate squared distance */    
+    /* Calculate squared distance */
     double dist = 0, dim_dist;
     int8_t i;
     for (i = 0; i < no_dims; i++)
@@ -1101,11 +1101,11 @@ Params:
 double get_cube_offset_double(int8_t dim, double *point_coord, double *bbox)
 {
     double dim_coord = point_coord[dim];
-    
+
     if (dim_coord < bbox[2 * dim])
     {
         /* Left of cube in dimension */
-        return dim_coord - bbox[2 * dim];  
+        return dim_coord - bbox[2 * dim];
     }
     else if (dim_coord > bbox[2 * dim + 1])
     {
@@ -1116,7 +1116,7 @@ double get_cube_offset_double(int8_t dim, double *point_coord, double *bbox)
     {
         /* Inside cube in dimension */
         return 0.;
-    }    
+    }
 }
 
 /************************************************
@@ -1134,7 +1134,7 @@ double get_min_dist_double(double *point_coord, int8_t no_dims, double *bbox)
     for (i = 0; i < no_dims; i++)
     {
         cube_offset_dim = get_cube_offset_double(i, point_coord, bbox);
-        cube_offset += cube_offset_dim * cube_offset_dim; 
+        cube_offset += cube_offset_dim * cube_offset_dim;
     }
 
     return cube_offset;
@@ -1145,19 +1145,19 @@ Search a leaf node for closest point
 Params:
     pa : data points
     pidx : permutation index of data points
-    no_dims : number of dimensions    
+    no_dims : number of dimensions
     start_idx : index of first data point to use
     size :  number of data points
     point_coord : query point
     closest_idx : index of closest data point found (return)
-    closest_dist : distance to closest point (return) 
+    closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord, 
+void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
                  uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist)
 {
     double cur_dist;
     uint32_t i;
-    /* Loop through all points in leaf */    
+    /* Loop through all points in leaf */
     for (i = 0; i < n; i++)
     {
         /* Get distance to query point */
@@ -1180,16 +1180,16 @@ Params:
     point_coord : query point
     min_dist : minumum distance to nearest neighbour
     closest_idx : index of closest data point found (return)
-    closest_dist : distance to closest point (return) 
+    closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
+void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord,
                       double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint32_t *closest_idx, double *closest_dist)
 {
     int8_t dim;
     double dist_left, dist_right;
     double new_offset;
     double box_diff;
-    
+
     /* Skip if distance bound exeeded */
     if (min_dist > distance_upper_bound)
     {
@@ -1197,39 +1197,39 @@ void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8
     }
 
     dim = root->cut_dim;
-    
+
     /* Handle leaf node */
     if (dim == -1)
     {
         search_leaf_double(pa, pidx, no_dims, root->start_idx, root->n, point_coord, k, closest_idx, closest_dist);
         return;
     }
-    
+
     /* Get distance to cutting plane */
     new_offset = point_coord[dim] - root->cut_val;
-    
+
     if (new_offset < 0)
     {
         /* Left of cutting plane */
         dist_left = min_dist;
         if (dist_left < closest_dist[k - 1] * eps_fac)
         {
-            /* Search left subtree if minimum distance is below limit */ 
+            /* Search left subtree if minimum distance is below limit */
             search_splitnode_double((Node_double *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
-        
-        /* Right of cutting plane. Update minimum distance. 
+
+        /* Right of cutting plane. Update minimum distance.
            See Algorithms for Fast Vector Quantization
            Sunil Arya and David M. Mount. */
         box_diff = root->cut_bounds_lv - point_coord[dim];
         if (box_diff < 0)
-        {			
+        {
 		box_diff = 0;
         }
         dist_right = min_dist - box_diff * box_diff + new_offset * new_offset;
         if (dist_right < closest_dist[k - 1] * eps_fac)
         {
-            /* Search right subtree if minimum distance is below limit*/ 
+            /* Search right subtree if minimum distance is below limit*/
             search_splitnode_double((Node_double *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
     }
@@ -1239,22 +1239,22 @@ void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8
         dist_right = min_dist;
         if (dist_right < closest_dist[k - 1] * eps_fac)
         {
-            /* Search right subtree if minimum distance is below limit*/ 
+            /* Search right subtree if minimum distance is below limit*/
             search_splitnode_double((Node_double *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
-        
+
         /* Left of cutting plane. Update minimum distance.
            See Algorithms for Fast Vector Quantization
            Sunil Arya and David M. Mount. */
         box_diff = point_coord[dim] - root->cut_bounds_hv;
         if (box_diff < 0)
-        {			
+        {
         	box_diff = 0;
         }
         dist_left = min_dist - box_diff * box_diff + new_offset * new_offset;
 	  if (dist_left < closest_dist[k - 1] * eps_fac)
         {
-            /* Search left subtree if minimum distance is below limit*/ 
+            /* Search left subtree if minimum distance is below limit*/
             search_splitnode_double((Node_double *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
         }
     }
@@ -1269,9 +1269,9 @@ Params:
     point_coords : query points
     num_points : number of query points
     closest_idx : index of closest data point found (return)
-    closest_dist : distance to closest point (return) 
+    closest_dist : distance to closest point (return)
 ************************************************/
-void search_tree_double(Tree_double *tree, double *pa, double *point_coords, 
+void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
                  uint32_t num_points, uint32_t k, double distance_upper_bound,
                  double eps, uint32_t *closest_idxs, double *closest_dists)
 {
@@ -1280,13 +1280,13 @@ void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
     int8_t no_dims = tree->no_dims;
     double *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    uint32_t i, j;
+    int32_t i, j;
     Node_double *root = (Node_double *)tree->root;
 
     /* Queries are OpenMP enabled */
     #pragma omp parallel
     {
-        /* The low chunk size is important to avoid L2 cache trashing  
+        /* The low chunk size is important to avoid L2 cache trashing
            for spatial coherent query datasets
         */
         #pragma omp for private(i, j) schedule(static, 100) nowait
