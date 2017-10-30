@@ -690,7 +690,9 @@ void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
     int8_t no_dims = tree->no_dims;
     float *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    int32_t i, j;
+    int32_t i = 0;
+	uint32_t j = 0;
+    int32_t local_num_points = (int32_t) num_points;
     Node_float *root = (Node_float *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -700,7 +702,7 @@ void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
            for spatial coherent query datasets
         */
         #pragma omp for private(i, j) schedule(static, 100) nowait
-        for (i = 0; i < num_points; i++)
+        for (i = 0; i < local_num_points; i++)
         {
             for (j = 0; j < k; j++)
             {
@@ -1280,7 +1282,9 @@ void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
     int8_t no_dims = tree->no_dims;
     double *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    int32_t i, j;
+    int32_t i = 0;
+	uint32_t j = 0;
+    int32_t local_num_points = (int32_t) num_points;
     Node_double *root = (Node_double *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -1290,7 +1294,7 @@ void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
            for spatial coherent query datasets
         */
         #pragma omp for private(i, j) schedule(static, 100) nowait
-        for (i = 0; i < num_points; i++)
+        for (i = 0; i < local_num_points; i++)
         {
             for (j = 0; j < k; j++)
             {
