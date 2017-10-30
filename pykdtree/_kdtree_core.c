@@ -690,9 +690,14 @@ void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
     int8_t no_dims = tree->no_dims;
     float *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
+    uint32_t j = 0;
+#if defined(_MSC_VER) && defined(_OPENMP)
     int32_t i = 0;
-	uint32_t j = 0;
     int32_t local_num_points = (int32_t) num_points;
+#else
+    uint32_t i;
+    uint32_t local_num_points = num_points;
+#endif
     Node_float *root = (Node_float *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -1282,9 +1287,14 @@ void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
     int8_t no_dims = tree->no_dims;
     double *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
+    uint32_t j = 0;
+#if defined(_MSC_VER) && defined(_OPENMP)
     int32_t i = 0;
-	uint32_t j = 0;
     int32_t local_num_points = (int32_t) num_points;
+#else
+    uint32_t i;
+    uint32_t local_num_points = num_points;
+#endif
     Node_double *root = (Node_double *)tree->root;
 
     /* Queries are OpenMP enabled */
