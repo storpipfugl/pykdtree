@@ -32,11 +32,27 @@ environment:
       PYTHON_VERSION: "3.5"
       PYTHON_ARCH: "32"
       MINICONDA_VERSION: "3"
+      USE_OMP: "0"
 
     - PYTHON: "C:\\Python35_64"
       PYTHON_VERSION: "3.5"
       PYTHON_ARCH: "64"
       MINICONDA_VERSION: "3"
+      USE_OMP: "0"
+
+    - PYTHON: "C:\\Python35_32"
+      PYTHON_VERSION: "3.5"
+      PYTHON_ARCH: "32"
+      MINICONDA_VERSION: "3"
+      USE_OMP: "1"
+      OMP_NUM_THREADS: "4"
+
+    - PYTHON: "C:\\Python35_64"
+      PYTHON_VERSION: "3.5"
+      PYTHON_ARCH: "64"
+      MINICONDA_VERSION: "3"
+      USE_OMP: "1"
+      OMP_NUM_THREADS: "4"
 
 install:
   - "git submodule update --init --recursive"
