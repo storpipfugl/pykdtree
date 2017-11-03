@@ -652,7 +652,14 @@ void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coo
     int8_t no_dims = tree->no_dims;
     ${DTYPE} *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    uint32_t i, j;
+    uint32_t j = 0;
+#if defined(_MSC_VER) && defined(_OPENMP)
+    int32_t i = 0;
+    int32_t local_num_points = (int32_t) num_points;
+#else
+    uint32_t i;
+    uint32_t local_num_points = num_points;
+#endif
     Node_${DTYPE} *root = (Node_${DTYPE} *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -662,7 +669,7 @@ void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coo
            for spatial coherent query datasets
         */
         #pragma omp for private(i, j) schedule(static, 100) nowait
-        for (i = 0; i < num_points; i++)
+        for (i = 0; i < local_num_points; i++)
         {
             for (j = 0; j < k; j++)
             {
