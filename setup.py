@@ -1,5 +1,5 @@
 #pykdtree, Fast kd-tree implementation with OpenMP-enabled queries
-# 
+#
 #Copyright (C) 2013 - present  Esben S. Nielsen
 #
 # This program is free software: you can redistribute it and/or modify it under
@@ -19,7 +19,7 @@ import os
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
-# Get OpenMP setting from environment  
+# Get OpenMP setting from environment
 try:
     use_omp = int(os.environ['USE_OMP'])
 except KeyError:
@@ -36,9 +36,9 @@ def set_builtin(name, value):
 # Custom builder to handler compiler flags. Edit if needed.
 class build_ext_subclass(build_ext):
     def build_extensions(self):
-        comp = self.compiler.compiler_type 
+        comp = self.compiler.compiler_type
         if comp in ('unix', 'cygwin', 'mingw32'):
-            # Check if build is with OpenMP 
+            # Check if build is with OpenMP
             if use_omp:
                 extra_compile_args = ['-std=c99', '-O3', '-fopenmp']
                 extra_link_args=['-lgomp']
@@ -69,8 +69,8 @@ class build_ext_subclass(build_ext):
         set_builtin('__NUMPY_SETUP__', False)
         import numpy
         self.include_dirs.append(numpy.get_include())
- 
-        
+
+
 setup(
     name='pykdtree',
     version='1.2.2',
@@ -83,7 +83,7 @@ setup(
     tests_require=['nose'],
     zip_safe=False,
     test_suite = 'nose.collector',
-    ext_modules = [Extension('pykdtree.kdtree', 
+    ext_modules = [Extension('pykdtree.kdtree',
                              ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
     cmdclass = {'build_ext': build_ext_subclass },
     classifiers=[
@@ -95,6 +95,6 @@ setup(
       'Topic :: Scientific/Engineering'
       ]
     )
-    
+
 
 

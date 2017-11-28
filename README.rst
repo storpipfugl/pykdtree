@@ -50,11 +50,11 @@ The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to it
     >>> from pykdtree.kdtree import KDTree
     >>> kd_tree = KDTree(data_pts)
     >>> dist, idx = kd_tree.query(query_pts, k=8)
-    
+
 The number of threads to be used in OpenMP enabled queries can be controlled with the standard OpenMP environment variable OMP_NUM_THREADS.
 
-The **leafsize** argument (number of data points per leaf) for the tree creation can be used to control the memory overhead of the kd-tree. pykdtree uses a default **leafsize=16**. 
-Increasing **leafsize** will reduce the memory overhead and construction time but increase query time.    
+The **leafsize** argument (number of data points per leaf) for the tree creation can be used to control the memory overhead of the kd-tree. pykdtree uses a default **leafsize=16**.
+Increasing **leafsize** will reduce the memory overhead and construction time but increase query time.
 
 pykdtree accepts data in double precision (numpy.float64) or single precision (numpy.float32) floating point. If data of another type is used an internal copy in double precision is made resulting in a memory overhead. If the kd-tree is constructed on single precision data the query points must be single precision as well.
 
@@ -76,7 +76,7 @@ Total 1 neighbour                    1367     598       319                 166
 
 query 8 neighbours                   2193     625       449                 143
 
-Total 8 neighbours                   2293     929       545                 293  
+Total 8 neighbours                   2293     929       545                 293
 ==================  =====================  ======  ========  ==================
 
 Looking at the combined construction and query this gives the following performance improvement relative to scipy.spatial.cKDTree
@@ -84,12 +84,12 @@ Looking at the combined construction and query this gives the following performa
 ==========  ======  ========  ==================
 Neighbours  libANN  pykdtree  pykdtree 4 threads
 ----------  ------  --------  ------------------
-1            129%      329%                723%                  
+1            129%      329%                723%
 
-8            147%      320%                682%         
+8            147%      320%                682%
 ==========  ======  ========  ==================
 
-Note: mileage will vary with the dataset at hand and computer architecture. 
+Note: mileage will vary with the dataset at hand and computer architecture.
 
 Test
 ----
