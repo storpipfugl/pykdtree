@@ -17,7 +17,7 @@
 
 import numpy as np
 cimport numpy as np
-from libc.stdint cimport uint32_t, int8_t
+from libc.stdint cimport uint32_t, int8_t, uint8_t
 cimport cython
 
 
@@ -55,11 +55,11 @@ cdef struct tree_double:
     node_double *root
 
 cdef extern tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
-cdef extern void search_tree_float(tree_float *kdtree, float *pa, float *point_coords, uint32_t num_points, uint32_t k, float distance_upper_bound, float eps_fac, uint32_t *closest_idxs, float *closest_dists) nogil
+cdef extern void search_tree_float(tree_float *kdtree, float *pa, float *point_coords, uint32_t num_points, uint32_t k, float distance_upper_bound, float eps_fac, uint8_t *mask, uint32_t *closest_idxs, float *closest_dists) nogil
 cdef extern void delete_tree_float(tree_float *kdtree)
 
 cdef extern tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
-cdef extern void search_tree_double(tree_double *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, double distance_upper_bound, double eps_fac, uint32_t *closest_idxs, double *closest_dists) nogil
+cdef extern void search_tree_double(tree_double *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, double distance_upper_bound, double eps_fac, uint8_t *mask, uint32_t *closest_idxs, double *closest_dists) nogil
 cdef extern void delete_tree_double(tree_double *kdtree)
 
 cdef class KDTree:
@@ -130,7 +130,7 @@ cdef class KDTree:
 
 
     def query(KDTree self, np.ndarray query_pts not None, k=1, eps=0,
-              distance_upper_bound=None, sqr_dists=False):
+              distance_upper_bound=None, sqr_dists=False, mask=None):
         """Query the kd-tree for nearest neighbors
 
         :Parameters:
@@ -148,6 +148,12 @@ cdef class KDTree:
         sqr_dists : bool, optional
             Internally pykdtree works with squared distances.
             Determines if the squared or Euclidean distances are returned.
+        mask : numpy array, optional
+            Array of booleans where neighbors are considered invalid and
+            should not be returned. A mask value of True represents an
+            invalid pixel. Mask should have shape (n,). By default all
+            points are considered valid.
+
         """
 
         # Check arguments
@@ -183,12 +189,23 @@ cdef class KDTree:
         cdef uint32_t *closest_idxs_data = <uint32_t *>closest_idxs.data
         cdef float *closest_dists_data_float
         cdef double *closest_dists_data_double
-
-        # Get query points data
-        cdef np.ndarray[float, ndim=1] query_array_float
-        cdef np.ndarray[double, ndim=1] query_array_double
-        cdef float *query_array_data_float
+ 
+        # Get query points data      
+        cdef np.ndarray[float, ndim=1] query_array_float 
+        cdef np.ndarray[double, ndim=1] query_array_double 
+        cdef float *query_array_data_float 
         cdef double *query_array_data_double
+        cdef np.ndarray[np.uint8_t, ndim=1] query_mask
+        cdef np.uint8_t *query_mask_data
+
+        if mask is not None and mask.size != self.n:
+            raise ValueError('Mask must have the same size as data points')
+        elif mask is not None:
+            query_mask = np.ascontiguousarray(mask.ravel(), dtype=np.uint8)
+            query_mask_data = <uint8_t *>query_mask.data
+        else:
+            query_mask_data = NULL
+
 
         if query_pts.dtype == np.float32 and self.data_pts.dtype == np.float32:
             closest_dists_float = np.empty(num_qpoints * k, dtype=np.float32)
@@ -202,7 +219,6 @@ cdef class KDTree:
             closest_dists_data_double = <double *>closest_dists_double.data
             query_array_double = np.ascontiguousarray(query_pts.ravel(), dtype=np.float64)
             query_array_data_double = <double *>query_array_double.data
-
 
         # Setup distance_upper_bound
         cdef float dub_float
@@ -225,16 +241,16 @@ cdef class KDTree:
         # Release GIL and query tree
         if self.data_pts.dtype == np.float32:
             with nogil:
-                search_tree_float(self._kdtree_float, self._data_pts_data_float,
+                search_tree_float(self._kdtree_float, self._data_pts_data_float, 
                                   query_array_data_float, num_qpoints, num_n, dub_float, epsilon_float,
-                                  closest_idxs_data, closest_dists_data_float)
+                                  query_mask_data, closest_idxs_data, closest_dists_data_float)
 
         else:
             with nogil:
-                search_tree_double(self._kdtree_double, self._data_pts_data_double,
+                search_tree_double(self._kdtree_double, self._data_pts_data_double, 
                                   query_array_data_double, num_qpoints, num_n, dub_double, epsilon_double,
-                                  closest_idxs_data, closest_dists_data_double)
-
+                                   query_mask_data, closest_idxs_data, closest_dists_data_double)
+        
         # Shape result
         if k > 1:
             closest_dists_res = closest_dists.reshape(num_qpoints, k)

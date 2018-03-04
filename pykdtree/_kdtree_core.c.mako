@@ -76,11 +76,13 @@ ${DTYPE} get_cube_offset_${DTYPE}(int8_t dim, ${DTYPE} *point_coord, ${DTYPE} *b
 ${DTYPE} get_min_dist_${DTYPE}(${DTYPE} *point_coord, int8_t no_dims, ${DTYPE} *bbox);
 void search_leaf_${DTYPE}(${DTYPE} *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, ${DTYPE} *restrict point_coord,
                  uint32_t k, uint32_t *restrict closest_idx, ${DTYPE} *restrict closest_dist);
+void search_leaf_${DTYPE}_mask(${DTYPE} *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, ${DTYPE} *restrict point_coord,
+                 uint32_t k, uint8_t *restrict mask, uint32_t *restrict closest_idx, ${DTYPE} *restrict closest_dist);
 void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, ${DTYPE} *point_coord,
-                      ${DTYPE} min_dist, uint32_t k, ${DTYPE} distance_upper_bound, ${DTYPE} eps_fac, uint32_t *  closest_idx, ${DTYPE} *closest_dist);
+                      ${DTYPE} min_dist, uint32_t k, ${DTYPE} distance_upper_bound, ${DTYPE} eps_fac, uint8_t *mask, uint32_t *  closest_idx, ${DTYPE} *closest_dist);
 void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coords,
                  uint32_t num_points, uint32_t k,  ${DTYPE} distance_upper_bound,
-                 ${DTYPE} eps, uint32_t *closest_idxs, ${DTYPE} *closest_dists);
+                 ${DTYPE} eps, uint8_t *mask, uint32_t *closest_idxs, ${DTYPE} *closest_dists);
 
 % endfor
 
@@ -542,6 +544,43 @@ void search_leaf_${DTYPE}(${DTYPE} *restrict pa, uint32_t *restrict pidx, int8_t
     }
 }
 
+
+/************************************************
+Search a leaf node for closest point with data point mask
+Params:
+    pa : data points
+    pidx : permutation index of data points
+    no_dims : number of dimensions
+    start_idx : index of first data point to use
+    size :  number of data points
+    point_coord : query point
+    mask : boolean array of invalid (True) and valid (False) data points
+    closest_idx : index of closest data point found (return)
+    closest_dist : distance to closest point (return)
+************************************************/
+void search_leaf_${DTYPE}_mask(${DTYPE} *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, ${DTYPE} *restrict point_coord,
+                               uint32_t k, uint8_t *mask, uint32_t *restrict closest_idx, ${DTYPE} *restrict closest_dist)
+{
+    ${DTYPE} cur_dist;
+    uint32_t i;
+    /* Loop through all points in leaf */
+    for (i = 0; i < n; i++)
+    {
+        /* Is this point masked out? */
+        if (mask[start_idx + i])
+        {
+            continue;
+        }
+        /* Get distance to query point */
+        cur_dist = calc_dist_${DTYPE}(&PA(start_idx + i, 0), point_coord, no_dims);
+        /* Update closest info if new point is closest so far*/
+        if (cur_dist < closest_dist[k - 1])
+        {
+            insert_point_${DTYPE}(closest_idx, closest_dist, pidx[start_idx + i], cur_dist, k);
+        }
+    }
+}
+
 /************************************************
 Search subtree for nearest to query point
 Params:
@@ -551,11 +590,13 @@ Params:
     no_dims : number of dimensions
     point_coord : query point
     min_dist : minumum distance to nearest neighbour
+    mask : boolean array of invalid (True) and valid (False) data points
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, ${DTYPE} *point_coord,
-                      ${DTYPE} min_dist, uint32_t k, ${DTYPE} distance_upper_bound, ${DTYPE} eps_fac, uint32_t *closest_idx, ${DTYPE} *closest_dist)
+void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx, int8_t no_dims, ${DTYPE} *point_coord, 
+                      ${DTYPE} min_dist, uint32_t k, ${DTYPE} distance_upper_bound, ${DTYPE} eps_fac, uint8_t *mask,
+                      uint32_t *closest_idx, ${DTYPE} *closest_dist)
 {
     int8_t dim;
     ${DTYPE} dist_left, dist_right;
@@ -573,7 +614,14 @@ void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx
     /* Handle leaf node */
     if (dim == -1)
     {
-        search_leaf_${DTYPE}(pa, pidx, no_dims, root->start_idx, root->n, point_coord, k, closest_idx, closest_dist);
+        if (mask)
+        {
+            search_leaf_${DTYPE}_mask(pa, pidx, no_dims, root->start_idx, root->n, point_coord, k, mask, closest_idx, closest_dist);
+        }
+        else
+        {
+            search_leaf_${DTYPE}(pa, pidx, no_dims, root->start_idx, root->n, point_coord, k, closest_idx, closest_dist);
+        }
         return;
     }
 
@@ -587,7 +635,7 @@ void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx
         if (dist_left < closest_dist[k - 1] * eps_fac)
         {
             /* Search left subtree if minimum distance is below limit */
-            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
+            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, mask, closest_idx, closest_dist);
         }
 
         /* Right of cutting plane. Update minimum distance.
@@ -602,7 +650,7 @@ void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx
         if (dist_right < closest_dist[k - 1] * eps_fac)
         {
             /* Search right subtree if minimum distance is below limit*/
-            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
+            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, mask, closest_idx, closest_dist);
         }
     }
     else
@@ -612,7 +660,7 @@ void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx
         if (dist_right < closest_dist[k - 1] * eps_fac)
         {
             /* Search right subtree if minimum distance is below limit*/
-            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
+            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->right_child, pa, pidx, no_dims, point_coord, dist_right, k, distance_upper_bound, eps_fac, mask, closest_idx, closest_dist);
         }
 
         /* Left of cutting plane. Update minimum distance.
@@ -627,7 +675,7 @@ void search_splitnode_${DTYPE}(Node_${DTYPE} *root, ${DTYPE} *pa, uint32_t *pidx
 	  if (dist_left < closest_dist[k - 1] * eps_fac)
         {
             /* Search left subtree if minimum distance is below limit*/
-            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, closest_idx, closest_dist);
+            search_splitnode_${DTYPE}((Node_${DTYPE} *)root->left_child, pa, pidx, no_dims, point_coord, dist_left, k, distance_upper_bound, eps_fac, mask, closest_idx, closest_dist);
         }
     }
 }
@@ -640,12 +688,13 @@ Params:
     pidx : permutation index of data points
     point_coords : query points
     num_points : number of query points
+    mask : boolean array of invalid (True) and valid (False) data points
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
 void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coords,
                  uint32_t num_points, uint32_t k, ${DTYPE} distance_upper_bound,
-                 ${DTYPE} eps, uint32_t *closest_idxs, ${DTYPE} *closest_dists)
+                 ${DTYPE} eps, uint8_t *mask, uint32_t *closest_idxs, ${DTYPE} *closest_dists)
 {
     ${DTYPE} min_dist;
     ${DTYPE} eps_fac = 1 / ((1 + eps) * (1 + eps));
@@ -678,7 +727,7 @@ void search_tree_${DTYPE}(Tree_${DTYPE} *tree, ${DTYPE} *pa, ${DTYPE} *point_coo
             }
             min_dist = get_min_dist_${DTYPE}(point_coords + no_dims * i, no_dims, bbox);
             search_splitnode_${DTYPE}(root, pa, pidx, no_dims, point_coords + no_dims * i, min_dist,
-                             k, distance_upper_bound, eps_fac, &closest_idxs[i * k], &closest_dists[i * k]);
+                             k, distance_upper_bound, eps_fac, mask, &closest_idxs[i * k], &closest_dists[i * k]);
         }
     }
 }

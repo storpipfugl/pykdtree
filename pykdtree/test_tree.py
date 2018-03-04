@@ -300,3 +300,45 @@ def test_scipy_comp():
     assert id(kdtree.data) == id(kdtree.data_pts)
 
 
+def test1d_mask():
+    data_pts = np.arange(1000)
+    kdtree = KDTree(data_pts, leafsize=15)
+    query_pts = np.arange(400, 300, -10)
+    query_mask = np.zeros(data_pts.shape[0]).astype(bool)
+    query_mask[400] = True
+    dist, idx = kdtree.query(query_pts, mask=query_mask)
+    assert idx[0] == 399  # would be 400 if no mask
+    assert dist[0] == 1.
+    assert idx[1] == 390
+
+
+def test1d_all_masked():
+    data_pts = np.arange(1000)
+    kdtree = KDTree(data_pts, leafsize=15)
+    query_pts = np.arange(400, 300, -10)
+    query_mask = np.ones(data_pts.shape[0]).astype(bool)
+    dist, idx = kdtree.query(query_pts, mask=query_mask)
+    # all invalid
+    assert np.all(i >= 1000 for i in idx)
+    assert np.all(d >= 1001 for d in dist)
+
+
+def test3d_mask():
+    #7, 93, 45
+    query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
+                          [751763.125, -59925.969, 6326205.5],
+                          [769957.188, -202418.125, 6321069.5]])
+
+    kdtree = KDTree(data_pts_real)
+    query_mask = np.zeros(data_pts_real.shape[0])
+    query_mask[6:10] = True
+    dist, idx = kdtree.query(query_pts, sqr_dists=True, mask=query_mask)
+
+    epsilon = 1e-5
+    assert idx[0] == 5  # would be 7 if no mask
+    assert idx[1] == 93
+    assert idx[2] == 45
+    # would be 0 if no mask
+    assert abs(dist[0] - 66759196.1053) < epsilon * dist[0]
+    assert abs(dist[1] - 3.) < epsilon * dist[1]
+    assert abs(dist[2] - 20001.) < epsilon * dist[2]
