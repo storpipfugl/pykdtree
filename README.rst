@@ -125,6 +125,8 @@ turned off by adding the following to `appveyor.yml` in the
 
 Changelog
 ---------
+v1.3.0 : Keyword argument "mask" added to "qeury" method. OpenMP compilation now works for MS Visual Studio compiler
+
 v1.2.2 : Build process fixes
 
 v1.2.1 : Fixed OpenMP thread safety issue introduced in v1.2.0
