@@ -607,7 +607,7 @@ void search_leaf_float_mask(float *restrict pa, uint32_t *restrict pidx, int8_t 
     for (i = 0; i < n; i++)
     {
         /* Is this point masked out? */
-        if (mask[start_idx + i])
+        if (mask[pidx[start_idx + i]])
         {
             continue;
         }
@@ -1251,7 +1251,7 @@ void search_leaf_double_mask(double *restrict pa, uint32_t *restrict pidx, int8_
     for (i = 0; i < n; i++)
     {
         /* Is this point masked out? */
-        if (mask[start_idx + i])
+        if (mask[pidx[start_idx + i]])
         {
             continue;
         }
