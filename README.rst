@@ -125,7 +125,9 @@ turned off by adding the following to `appveyor.yml` in the
 
 Changelog
 ---------
-v1.3.0 : Keyword argument "mask" added to "qeury" method. OpenMP compilation now works for MS Visual Studio compiler
+v1.3.1 : Fix masking in the "query" method introduced in 1.3.0
+
+v1.3.0 : Keyword argument "mask" added to "query" method. OpenMP compilation now works for MS Visual Studio compiler
 
 v1.2.2 : Build process fixes
 
