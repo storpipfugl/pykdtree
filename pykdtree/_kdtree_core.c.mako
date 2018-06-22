@@ -567,7 +567,7 @@ void search_leaf_${DTYPE}_mask(${DTYPE} *restrict pa, uint32_t *restrict pidx, i
     for (i = 0; i < n; i++)
     {
         /* Is this point masked out? */
-        if (mask[start_idx + i])
+        if (mask[pidx[start_idx + i]])
         {
             continue;
         }
