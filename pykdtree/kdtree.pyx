@@ -135,7 +135,7 @@ cdef class KDTree:
 
         :Parameters:
         query_pts : numpy array
-            Query points with shape (n , dims)
+            Query points with shape (m, dims)
         k : int
             The number of nearest neighbours to return
         eps : non-negative float
@@ -151,8 +151,8 @@ cdef class KDTree:
         mask : numpy array, optional
             Array of booleans where neighbors are considered invalid and
             should not be returned. A mask value of True represents an
-            invalid pixel. Mask should have shape (n,). By default all
-            points are considered valid.
+            invalid pixel. Mask should have shape (n,) to match data points.
+            By default all points are considered valid.
 
         """
 
