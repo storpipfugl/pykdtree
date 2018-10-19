@@ -89,7 +89,8 @@ setup(
     cmdclass = {'build_ext': build_ext_subclass },
     classifiers=[
       'Development Status :: 5 - Production/Stable',
-      'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+      ('License :: OSI Approved :: '
+          'GNU Lesser General Public License v3 (LGPLv3)'),
       'Programming Language :: Python',
       'Operating System :: OS Independent',
       'Intended Audience :: Science/Research',
