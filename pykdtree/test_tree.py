@@ -352,19 +352,21 @@ def test3d_mask():
     assert abs(dist[1] - 3.) < epsilon * dist[1]
     assert abs(dist[2] - 20001.) < epsilon * dist[2]
 
-def test129d_fail():
-    dims = 129
-    data_pts = np.arange(100 * dims).reshape(100, dims)
+def test128d_fail():
+    pts = 100
+    dims = 128
+    data_pts = np.arange(pts * dims).reshape(pts, dims)
     try:
         kdtree = KDTree(data_pts)
     except ValueError as exc:
-        assert "Max 128 dimensions" in str(exc)
+        assert "Max 127 dimensions" in str(exc)
     else:
         raise Exception("Should not accept 129 dimensional data")
 
-def test128d_ok():
-    dims = 128
-    data_pts = np.arange(100 * dims).reshape(100, dims)
+def test127d_ok():
+    pts = 2
+    dims = 127
+    data_pts = np.arange(pts * dims).reshape(pts, dims)
     kdtree = KDTree(data_pts)
-    dist, idx = kdtree.query(query_pts)
+    dist, idx = kdtree.query(data_pts)
     assert np.all(dist == 0)

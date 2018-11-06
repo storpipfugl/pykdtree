@@ -115,8 +115,8 @@ cdef class KDTree:
         self.leafsize = <uint32_t>leafsize
         if data_pts.ndim == 1:
             self.ndim = 1
-        elif data_pts.shape[1] > 128:
-            raise ValueError('Max 128 dimensions allowed')
+        elif data_pts.shape[1] > 127:
+            raise ValueError('Max 127 dimensions allowed')
         else:
             self.ndim = <int8_t>data_pts.shape[1]
 
