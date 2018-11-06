@@ -168,8 +168,8 @@ Params:
 void get_bounding_box_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, float *bbox)
 {
     float cur;
-    int8_t bbox_idx, i, j;
-    uint32_t i2;
+    int8_t i, j;
+    uint32_t bbox_idx, i2;
 
     /* Use first data point to initialize */
     for (i = 0; i < no_dims; i++)
@@ -812,8 +812,8 @@ Params:
 void get_bounding_box_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, double *bbox)
 {
     double cur;
-    int8_t bbox_idx, i, j;
-    uint32_t i2;
+    int8_t i, j;
+    uint32_t bbox_idx, i2;
 
     /* Use first data point to initialize */
     for (i = 0; i < no_dims; i++)
