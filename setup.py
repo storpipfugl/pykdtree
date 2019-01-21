@@ -16,14 +16,33 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
+
+
+def is_conda_interpreter():
+    """Is the running interpreter from Anaconda or miniconda?
+
+    See https://stackoverflow.com/a/21318941/433202
+
+    Examples::
+
+        2.7.6 |Anaconda 1.8.0 (x86_64)| (default, Jan 10 2014, 11:23:15)
+        2.7.6 |Continuum Analytics, Inc.| (default, Jan 10 2014, 11:23:15)
+        3.6.6 | packaged by conda-forge | (default, Jul 26 2018, 09:55:02)
+
+    """
+    return 'conda' in sys.version or 'Continuum' in sys.version
+
 
 # Get OpenMP setting from environment
 try:
     use_omp = int(os.environ['USE_OMP'])
 except KeyError:
-    use_omp = True
+    # OpenMP is not supported with default clang
+    # Conda provides its own compiler which does support openmp
+    use_omp = 'darwin' not in sys.platform or is_conda_interpreter()
 
 
 def set_builtin(name, value):
@@ -77,16 +96,16 @@ setup(
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     author='Esben S. Nielsen',
     author_email='storpipfugl@gmail.com',
-    packages = ['pykdtree'],
+    packages=['pykdtree'],
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     install_requires=['numpy'],
     setup_requires=['numpy'],
     tests_require=['nose'],
     zip_safe=False,
-    test_suite = 'nose.collector',
-    ext_modules = [Extension('pykdtree.kdtree',
-                             ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
-    cmdclass = {'build_ext': build_ext_subclass },
+    test_suite='nose.collector',
+    ext_modules=[Extension('pykdtree.kdtree',
+                           ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
+    cmdclass={'build_ext': build_ext_subclass},
     classifiers=[
       'Development Status :: 5 - Production/Stable',
       ('License :: OSI Approved :: '
