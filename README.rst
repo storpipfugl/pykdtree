@@ -20,14 +20,18 @@ Queries are optionally multithreaded using OpenMP.
 
 Installation
 ------------
-Default build of pykdtree with OpenMP enabled queries using libgomp
+
+By default pykdtree is built with OpenMP enabled queries using libgomp except
+on OSX systems using the clang compiler (conda environments use a separate
+compiler).
 
 .. code-block:: bash
 
     $ cd <pykdtree_dir>
     $ python setup.py install
 
-If it fails with undefined compiler flags or you want to use another OpenMP implementation please modify setup.py at the indicated point to match your system.
+If it fails with undefined compiler flags or you want to use another OpenMP
+implementation please modify setup.py at the indicated point to match your system.
 
 Building without OpenMP support is controlled by the USE_OMP environment variable
 
@@ -42,6 +46,12 @@ Note evironment variables are by default not exported when using sudo so in this
 .. code-block:: bash
 
     $ USE_OMP=0 sudo -E python setup.py install
+
+Pykdtree can also be installed with conda via the conda-forge channel:
+
+.. code-block:: bash
+
+    $ conda install -c conda-forge pykdtree
 
 Usage
 -----
