@@ -1,0 +1,83 @@
+---
+name: Deploy wheels
+
+on:
+  push:
+  release:
+    types:
+      - published
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+        python-version: [3.5, 3.6, 3.7, 3.8]
+        include:
+          # Using pythons inside a docker image to provide all the Linux
+          # python-versions permutations.
+          - name: manylinux 64-bit
+            os: ubuntu-latest
+            python-version: 3.8
+            docker-image: manylinux1_x86_64
+          - name: manylinux 32-bit
+            os: ubuntu-latest
+            python-version: 3.8
+            docker-image: manylinux1_i686
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          git fetch --prune --unshallow
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U -q pip pytest wheel setuptools twine numpy
+
+      - name: Build and install macOS/Windows wheel
+        if: matrix.os != 'ubuntu-latest'
+        run: |
+          python setup.py -q bdist_wheel
+          pip install --find-links=./dist/ pykdtree
+
+      - name: Test
+        if: matrix.os != 'ubuntu-latest'
+        run: |
+          pytest -v --pyargs pykdtree
+
+      - name: Build Linux wheels inside docker
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          docker run \
+            -e PLAT=${{ matrix.docker-image }} \
+            -e USE_OMP=1 \
+            -v `pwd`:/io \
+            quay.io/pypa/${{ matrix.docker-image }} \
+            /io/scripts/build-manylinux-wheels.sh
+
+      - name: Upload wheel(s) as build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist/*.whl
+
+      - name: Publish package to PyPI
+        if: github.event.action == 'published'
+        env:
+          TWINE_USERNAME: ${{ secrets.pypi_username }}
+          TWINE_PASSWORD: ${{ secrets.pypi_password }}
+        run: twine upload --skip-existing dist/*.whl
+
+      - name: Publish package to TestPyPI
+        env:
+          TWINE_USERNAME: ${{ secrets.test_pypi_username }}
+          TWINE_PASSWORD: ${{ secrets.test_pypi_password }}
+        run: |
+          twine upload --repository-url https://test.pypi.org/legacy/ --skip-existing dist/*.whl
