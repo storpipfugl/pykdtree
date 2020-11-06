@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest]
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         include:
           # Using pythons inside a docker image to provide all the Linux
           # python-versions permutations.
@@ -74,10 +74,3 @@ jobs:
           TWINE_USERNAME: ${{ secrets.pypi_username }}
           TWINE_PASSWORD: ${{ secrets.pypi_password }}
         run: twine upload --skip-existing dist/*.whl
-
-      - name: Publish package to TestPyPI
-        env:
-          TWINE_USERNAME: ${{ secrets.test_pypi_username }}
-          TWINE_PASSWORD: ${{ secrets.test_pypi_password }}
-        run: |
-          twine upload --repository-url https://test.pypi.org/legacy/ --skip-existing dist/*.whl
