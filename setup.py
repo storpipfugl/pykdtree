@@ -89,11 +89,15 @@ class build_ext_subclass(build_ext):
         import numpy
         self.include_dirs.append(numpy.get_include())
 
+with open('README.rst', 'r') as readme_file:
+    readme = readme_file.read()
 
 setup(
     name='pykdtree',
     version='1.3.2',
+    url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
+    long_description=readme,
     author='Esben S. Nielsen',
     author_email='storpipfugl@gmail.com',
     packages=['pykdtree'],

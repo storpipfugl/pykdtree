@@ -1,3 +1,4 @@
 exclude pykdtree/render_template.py
 include LICENSE.txt
+include README.rst
 include pykdtree/*.pyx
