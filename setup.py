@@ -37,12 +37,8 @@ def is_conda_interpreter():
 
 
 # Get OpenMP setting from environment
-try:
-    use_omp = int(os.environ['USE_OMP'])
-except KeyError:
-    # OpenMP is not supported with default clang
-    # Conda provides its own compiler which does support openmp
-    use_omp = 'darwin' not in sys.platform or is_conda_interpreter()
+USE_OMP = int(os.environ.get('USE_OMP', True))
+IS_OSX = 'darwin' in sys.platform
 
 
 def set_builtin(name, value):
@@ -58,16 +54,20 @@ class build_ext_subclass(build_ext):
         comp = self.compiler.compiler_type
         if comp in ('unix', 'cygwin', 'mingw32'):
             # Check if build is with OpenMP
-            if use_omp:
-                extra_compile_args = ['-std=c99', '-O3', '-fopenmp']
-                extra_link_args=['-lgomp']
+            if USE_OMP and IS_OSX:
+                if IS_OSX:
+                    extra_compile_args = ['-std=c99', '-O3', '-Xpreprocessor', '-fopenmp']
+                    extra_link_args = ['-lomp']
+                else:
+                    extra_compile_args = ['-std=c99', '-O3', '-fopenmp']
+                    extra_link_args = ['-lgomp']
             else:
                 extra_compile_args = ['-std=c99', '-O3']
                 extra_link_args = []
         elif comp == 'msvc':
             extra_compile_args = ['/Ox']
             extra_link_args = []
-            if use_omp:
+            if USE_OMP:
                 extra_compile_args.append('/openmp')
         else:
             # Add support for more compilers here
@@ -76,11 +76,11 @@ class build_ext_subclass(build_ext):
         self.extensions[0].extra_compile_args = extra_compile_args
         self.extensions[0].extra_link_args = extra_link_args
         build_ext.build_extensions(self)
-
     def finalize_options(self):
         '''
-        In order to avoid premature import of numpy before it gets installed as a dependency
-        get numpy include directories during the extensions building process
+        In order to avoid premature import of numpy before it gets installed
+        as a dependency get numpy include directories during the extensions
+        building process
         http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py
         '''
         build_ext.finalize_options(self)
@@ -88,7 +88,6 @@ class build_ext_subclass(build_ext):
         set_builtin('__NUMPY_SETUP__', False)
         import numpy
         self.include_dirs.append(numpy.get_include())
-
 
 setup(
     name='pykdtree',
@@ -103,16 +102,16 @@ setup(
     tests_require=['nose'],
     zip_safe=False,
     test_suite='nose.collector',
-    ext_modules=[Extension('pykdtree.kdtree',
-                           ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
+    ext_modules=[
+        Extension('pykdtree.kdtree',
+                  ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])
+    ],
     cmdclass={'build_ext': build_ext_subclass},
     classifiers=[
-      'Development Status :: 5 - Production/Stable',
-      ('License :: OSI Approved :: '
-          'GNU Lesser General Public License v3 (LGPLv3)'),
-      'Programming Language :: Python',
-      'Operating System :: OS Independent',
-      'Intended Audience :: Science/Research',
-      'Topic :: Scientific/Engineering'
-      ]
-    )
+        'Development Status :: 5 - Production/Stable',
+        ('License :: OSI Approved :: '
+         'GNU Lesser General Public License v3 (LGPLv3)'),
+        'Programming Language :: Python', 'Operating System :: OS Independent',
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering'
+    ])
