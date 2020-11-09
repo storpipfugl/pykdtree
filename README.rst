@@ -135,6 +135,8 @@ turned off by adding the following to `appveyor.yml` in the
 
 Changelog
 ---------
+v1.3.3 : Add compatibility to python 3.9
+
 v1.3.2 : Change OSX installation to not use OpenMP without conda interpreter
 
 v1.3.1 : Fix masking in the "query" method introduced in 1.3.0
