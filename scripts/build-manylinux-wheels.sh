@@ -25,7 +25,7 @@ mkdir -p /io/temp-wheels
 find /io/temp-wheels/ -type f -delete
 
 # Iterate through available pythons.
-for PYBIN in /opt/python/cp3[5678]*/bin; do
+for PYBIN in /opt/python/cp3[6789]*/bin; do
     "${PYBIN}/pip" install -q -U setuptools wheel nose --cache-dir /io/pip-cache
     # Run the following in root of this repo.
     (cd /io/ && USE_OMP=$USE_OMP "${PYBIN}/pip" install -q .)
