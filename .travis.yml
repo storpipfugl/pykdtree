@@ -55,6 +55,7 @@ matrix:
     - os: osx
       language: shell  # 'language: python' is an error on Travis CI macOS
       env: USE_OMP=0
+      osx_image: xcode12
       before_install:
         - python --version
         - pip install cython --user
@@ -62,6 +63,7 @@ matrix:
       - pip install . --user
       script: python setup.py test
     - os: osx
+      osx_image: xcode12
       language: shell  # 'language: python' is an error on Travis CI macOS
       env: USE_OMP=1 OMP_NUM_THREADS=4
       before_install:
