@@ -135,6 +135,8 @@ turned off by adding the following to `appveyor.yml` in the
 
 Changelog
 ---------
+v1.3.4 : Fix Python 3.9 wheels not being built for linux
+
 v1.3.3 : Add compatibility to python 3.9
 
 v1.3.2 : Change OSX installation to not use OpenMP without conda interpreter
