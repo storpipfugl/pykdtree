@@ -26,11 +26,13 @@ find /io/temp-wheels/ -type f -delete
 
 # Iterate through available pythons.
 for PYBIN in /opt/python/cp3[6789]*/bin; do
-    "${PYBIN}/pip" install -q -U setuptools wheel nose --cache-dir /io/pip-cache
+    "${PYBIN}/pip" install -q -U setuptools wheel pytest --cache-dir /io/pip-cache
     # Run the following in root of this repo.
-    (cd /io/ && USE_OMP=$USE_OMP "${PYBIN}/pip" install -q .)
-    (cd /io/ && USE_OMP=$USE_OMP "${PYBIN}/python" setup.py nosetests)
-    (cd /io/ && USE_OMP=$USE_OMP "${PYBIN}/python" setup.py -q bdist_wheel -d /io/temp-wheels)
+    pushd /io/
+    USE_OMP=$USE_OMP "${PYBIN}/pip" install -q .
+    USE_OMP=$USE_OMP "${PYBIN}/pytest" --pyargs pykdtree
+    USE_OMP=$USE_OMP "${PYBIN}/python" setup.py -q bdist_wheel -d /io/temp-wheels
+    popd
 done
 
 "$PYBIN/pip" install -q auditwheel
