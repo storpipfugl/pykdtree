@@ -25,14 +25,25 @@ mkdir -p /io/temp-wheels
 find /io/temp-wheels/ -type f -delete
 
 # Iterate through available pythons.
-for PYBIN in /opt/python/cp3[6789]*/bin; do
-    "${PYBIN}/pip" install -q -U setuptools wheel pytest --cache-dir /io/pip-cache
-    # Run the following in root of this repo.
-    pushd /io/
-    USE_OMP=$USE_OMP "${PYBIN}/pip" install -q .
-    USE_OMP=$USE_OMP "${PYBIN}/pytest" --pyargs pykdtree
-    USE_OMP=$USE_OMP "${PYBIN}/python" setup.py -q bdist_wheel -d /io/temp-wheels
-    popd
+for PY in cp3{6,7,8,9,10}; do
+    if [[ $PLAT == manylinux2010* ]]; then
+        if [ "$PY" != "cp310" ]; then
+            continue
+        fi
+    else
+        if [ "$PY" = "cp310" ]; then
+            continue
+        fi
+    fi
+    for PYBIN in /opt/python/"${PY}"*/bin; do
+        "${PYBIN}/pip" install -q -U setuptools wheel pytest --cache-dir /io/pip-cache
+        # Run the following in root of this repo.
+        pushd /io/
+        USE_OMP=$USE_OMP "${PYBIN}/pip" install -q .
+        USE_OMP=$USE_OMP "${PYBIN}/pytest" --pyargs pykdtree
+        USE_OMP=$USE_OMP "${PYBIN}/python" setup.py -q bdist_wheel -d /io/temp-wheels
+        popd
+    done
 done
 
 "$PYBIN/pip" install -q auditwheel
