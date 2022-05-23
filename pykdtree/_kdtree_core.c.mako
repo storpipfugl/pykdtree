@@ -37,7 +37,7 @@ Anne M. Archibald and libANN by David M. Mount and Sunil Arya.
 
 % for DTYPE in ['float', 'double']:
 
-typedef struct
+typedef struct Node_${DTYPE}
 {
     ${DTYPE} cut_val;
     int8_t cut_dim;
@@ -49,7 +49,7 @@ typedef struct
     struct Node_${DTYPE} *right_child;
 } Node_${DTYPE};
 
-typedef struct
+typedef struct Tree_${DTYPE}
 {
     ${DTYPE} *bbox;
     int8_t no_dims;

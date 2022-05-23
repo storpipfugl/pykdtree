@@ -36,7 +36,7 @@ Anne M. Archibald and libANN by David M. Mount and Sunil Arya.
 #endif
 
 
-typedef struct
+typedef struct Node_float
 {
     float cut_val;
     int8_t cut_dim;
@@ -48,7 +48,7 @@ typedef struct
     struct Node_float *right_child;
 } Node_float;
 
-typedef struct
+typedef struct Tree_float
 {
     float *bbox;
     int8_t no_dims;
@@ -57,7 +57,7 @@ typedef struct
 } Tree_float;
 
 
-typedef struct
+typedef struct Node_double
 {
     double cut_val;
     int8_t cut_dim;
@@ -69,7 +69,7 @@ typedef struct
     struct Node_double *right_child;
 } Node_double;
 
-typedef struct
+typedef struct Tree_double
 {
     double *bbox;
     int8_t no_dims;
