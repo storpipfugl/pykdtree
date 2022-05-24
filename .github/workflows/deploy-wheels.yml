@@ -26,6 +26,14 @@ jobs:
             os: ubuntu-latest
             python-version: 3.8
             docker-image: manylinux1_i686
+          - name: manylinux2010 64-bit
+            os: ubuntu-latest
+            python-version: 3.8
+            docker-image: manylinux2010_x86_64
+          - name: manylinux2010 32-bit
+            os: ubuntu-latest
+            python-version: 3.8
+            docker-image: manylinux2010_i686
 
     steps:
       - uses: actions/checkout@v2
