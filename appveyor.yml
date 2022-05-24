@@ -73,7 +73,7 @@ install:
   # target Python version and architecture
   - "conda update --yes conda"
   - "conda config --add channels conda-forge"
-  - "conda create -q --yes -n test python=%PYTHON_VERSION% numpy nose"
+  - "conda create -q --yes -n test python=%PYTHON_VERSION% numpy pytest"
   - "activate test"
   - "pip install coveralls"
   - "where python"
@@ -82,7 +82,8 @@ build: false  # Not a C# project, build stuff at the test step instead.
 
 test_script:
   # Build the compiled extension and run the project tests
-  - "%CMD_IN_ENV% python setup.py test"
+  - "%CMD_IN_ENV% pip install ."
+  - "%CMD_IN_ENV% pytest"
 
 after_test:
   # If tests are successful, create a whl package for the project.

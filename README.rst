@@ -103,12 +103,12 @@ Note: mileage will vary with the dataset at hand and computer architecture.
 
 Test
 ----
-Run the unit tests using nosetest
+Run the unit tests using pytest
 
 .. code-block:: bash
 
     $ cd <pykdtree_dir>
-    $ python setup.py nosetests
+    $ pytest
 
 Installing on AppVeyor
 ----------------------
