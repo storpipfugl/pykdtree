@@ -25,7 +25,7 @@ mkdir -p /io/temp-wheels
 find /io/temp-wheels/ -type f -delete
 
 # Iterate through available pythons.
-for PY in cp3{6,7,8,9,10}; do
+for PY in cp3{7,8,9,10}; do
     if [[ $PLAT == manylinux2010* ]]; then
         if [ "$PY" != "cp310" ]; then
             continue
