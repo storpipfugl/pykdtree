@@ -18,14 +18,6 @@ jobs:
         include:
           # Using pythons inside a docker image to provide all the Linux
           # python-versions permutations.
-          - name: manylinux 64-bit
-            os: ubuntu-latest
-            python-version: 3.8
-            docker-image: manylinux1_x86_64
-          - name: manylinux 32-bit
-            os: ubuntu-latest
-            python-version: 3.8
-            docker-image: manylinux1_i686
           - name: manylinux2010 64-bit
             os: ubuntu-latest
             python-version: 3.8
