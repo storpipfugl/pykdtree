@@ -3,14 +3,14 @@ set -e -x
 
 # This is to be run by Docker inside a Docker image.
 # You can test it locally on a Linux machine by installing docker and running from this repo's root:
-# $ docker run -e PLAT=manylinux1_x86_64 -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /io/scripts/build-manylinux-wheels.sh
+# $ docker run -e PLAT=manylinux2010_x86_64 -v `pwd`:/io quay.io/pypa/manylinux2010_x86_64 /io/scripts/build-manylinux-wheels.sh
 
 # * The -e just defines an environment variable PLAT=[docker name] inside the
 #    docker - auditwheel can't detect the docker name automatically.
 # * The -v gives a directory alias for passing files in and out of the docker
 #    (/io is arbitrary). E.g the `setup.py` script would be accessed in the
 #    docker via `/io/setup.py`.
-# * quay.io/pypa/manylinux1_x86_64 is the full docker image name. Docker
+# * quay.io/pypa/manylinux2010_x86_64 is the full docker image name. Docker
 #    downloads it automatically.
 # * The last argument is a shell command that the Docker will execute.
 #    Filenames must be from the Docker's perspective.
@@ -25,14 +25,16 @@ mkdir -p /io/temp-wheels
 find /io/temp-wheels/ -type f -delete
 
 # Iterate through available pythons.
-for PYBIN in /opt/python/cp3[6789]*/bin; do
-    "${PYBIN}/pip" install -q -U setuptools wheel pytest --cache-dir /io/pip-cache
-    # Run the following in root of this repo.
-    pushd /io/
-    USE_OMP=$USE_OMP "${PYBIN}/pip" install -q .
-    USE_OMP=$USE_OMP "${PYBIN}/pytest" --pyargs pykdtree
-    USE_OMP=$USE_OMP "${PYBIN}/python" setup.py -q bdist_wheel -d /io/temp-wheels
-    popd
+for PY in cp3{7,8,9,10}; do
+    for PYBIN in /opt/python/"${PY}"*/bin; do
+        "${PYBIN}/pip" install -q -U setuptools wheel pytest build --cache-dir /io/pip-cache
+        # Run the following in root of this repo.
+        pushd /io/
+        USE_OMP=$USE_OMP "${PYBIN}/pip" install -q .
+        USE_OMP=$USE_OMP "${PYBIN}/pytest" --pyargs pykdtree
+        USE_OMP=$USE_OMP "${PYBIN}/python" -m build -w -o /io/temp-wheels
+        popd
+    done
 done
 
 "$PYBIN/pip" install -q auditwheel

@@ -14,18 +14,18 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
         include:
           # Using pythons inside a docker image to provide all the Linux
           # python-versions permutations.
-          - name: manylinux 64-bit
+          - name: manylinux2010 64-bit
             os: ubuntu-latest
             python-version: 3.8
-            docker-image: manylinux1_x86_64
-          - name: manylinux 32-bit
+            docker-image: manylinux2010_x86_64
+          - name: manylinux2010 32-bit
             os: ubuntu-latest
             python-version: 3.8
-            docker-image: manylinux1_i686
+            docker-image: manylinux2010_i686
 
     steps:
       - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "${{ matrix.python-version }}"
 
       - name: Install dependencies
         run: |
