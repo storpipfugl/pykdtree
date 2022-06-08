@@ -1,14 +1,32 @@
 ---
-name: Deploy wheels
+name: Build Test Deploy
 
 on:
   push:
+  pull_request:
   release:
     types:
       - published
 jobs:
-  build:
+  build_sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
 
+      - name: Create sdist
+        shell: bash -l {0}
+        run: |
+          python -m pip install -q build
+          python -m build -s
+
+      - name: Upload sdist to build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  build_wheels:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -68,9 +86,24 @@ jobs:
           name: wheels
           path: dist/*.whl
 
+  upload_pypi:
+    needs: [build_sdist, build_wheels]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download sdist artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: sdist
+          path: dist
+      - name: Download wheels artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: wheels
+          path: dist
       - name: Publish package to PyPI
         if: github.event.action == 'published'
         env:
           TWINE_USERNAME: ${{ secrets.pypi_username }}
           TWINE_PASSWORD: ${{ secrets.pypi_password }}
-        run: twine upload --skip-existing dist/*.whl
+        run: twine upload --skip-existing dist/*.whl dist/*.tar.gz
+
