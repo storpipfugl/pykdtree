@@ -1,5 +1,5 @@
-.. image:: https://github.com/storpipfugl/pykdtree/workflows/deploy-wheels/badge.svg?branch=master
-    :target: https://github.com/storpipfugl/pykdtree/actions?query=workflow%3A%22deploy-wheels%22
+.. image:: https://github.com/storpipfugl/pykdtree/actions/workflows/deploy-wheels.yml/badge.svg?branch=master
+    :target: https://github.com/storpipfugl/pykdtree/actions/workflows/deploy-wheels.yml
 
 ========
 pykdtree
