@@ -1,7 +1,5 @@
-.. image:: https://travis-ci.org/storpipfugl/pykdtree.svg?branch=master
-    :target: https://travis-ci.org/storpipfugl/pykdtree
-.. image:: https://ci.appveyor.com/api/projects/status/ubo92368ktt2d25g/branch/master
-    :target: https://ci.appveyor.com/project/storpipfugl/pykdtree
+.. image:: https://github.com/storpipfugl/pykdtree/workflows/deploy-wheels/badge.svg?branch=master
+    :target: https://github.com/storpipfugl/pykdtree/actions?query=workflow%3A%22deploy-wheels%22
 
 ========
 pykdtree
@@ -135,6 +133,8 @@ turned off by adding the following to `appveyor.yml` in the
 
 Changelog
 ---------
+v1.3.5 : Build Python 3.10 wheels and other CI updates
+
 v1.3.4 : Fix Python 3.9 wheels not being built for linux
 
 v1.3.3 : Add compatibility to python 3.9
