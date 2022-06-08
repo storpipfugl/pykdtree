@@ -3,6 +3,7 @@ name: Build Test Deploy
 
 on:
   push:
+  pull_request:
   release:
     types:
       - published
