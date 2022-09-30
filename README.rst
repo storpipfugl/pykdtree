@@ -19,17 +19,54 @@ Queries are optionally multithreaded using OpenMP.
 Installation
 ------------
 
-By default pykdtree is built with OpenMP enabled queries using libgomp except
-on OSX systems using the clang compiler (conda environments use a separate
-compiler).
+Pykdtree can be installed via pip:
+
+.. code-block:: bash
+
+    pip install pykdtree
+    
+Or, if in a conda-based environment, with conda from the conda-forge channel:
+
+.. code-block:: bash
+
+    conda install -c conda-forge pykdtree
+    
+Note that by default these packages are only built with OpenMP for linux platforms.
+To attempt to build from source with OpenMP support do:
+
+.. code-block:: bash
+
+    export USE_OMP=1
+    pip install --no-binary pykdtree pykdtree
+    
+This may not work on some systems that don't have OpenMP installed. See the below development
+instructions for more guidance. Disabling OpenMP can be accomplished by setting `USE_OMP` to `0`
+in the above commands.
+
+Development Installation
+------------------------
+
+If you wish to contribute to pykdtree then it is a good idea to install from source
+so you can quickly see the effects of your changes.
+By default pykdtree is built with OpenMP enabled queries on unix-like systems.
+On linux this is done using libgomp. On OSX systems OpenMP is provided using the
+clang compiler (conda environments use a separate compiler).
 
 .. code-block:: bash
 
     $ cd <pykdtree_dir>
-    $ python setup.py install
+    $ pip install -e .
 
-If it fails with undefined compiler flags or you want to use another OpenMP
-implementation please modify setup.py at the indicated point to match your system.
+This installs pykdtree in an "editable" mode where changes to the Python files
+are automatically reflected when running a new python interpreter instance
+(ex. running a python script that uses pykdtree). It does not automatically rebuild
+or recompile the `.mako` templates and `.pyx` Cython code in pykdtree. Editing
+these files requires running the `pykdtree/render_template.py` script and then
+rerunning the pip command above to recompile the Cython files.
+
+If installation fails with undefined compiler flags or you want to use another OpenMP
+implementation you may need to modify setup.py or specify additional pip command line
+flags to match the library locations on your system.
 
 Building without OpenMP support is controlled by the USE_OMP environment variable
 
@@ -37,22 +74,17 @@ Building without OpenMP support is controlled by the USE_OMP environment variabl
 
     $ cd <pykdtree_dir>
     $ export USE_OMP=0
-    $ python setup.py install
+    $ pip install -e .
 
 Note evironment variables are by default not exported when using sudo so in this case do
 
 .. code-block:: bash
 
-    $ USE_OMP=0 sudo -E python setup.py install
-
-Pykdtree can also be installed with conda via the conda-forge channel:
-
-.. code-block:: bash
-
-    $ conda install -c conda-forge pykdtree
+    $ USE_OMP=0 sudo -E pip install -e .
 
 Usage
 -----
+
 The usage of pykdtree is similar to scipy.spatial.cKDTree so for now refer to its documentation
 
     >>> from pykdtree.kdtree import KDTree
