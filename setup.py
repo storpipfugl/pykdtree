@@ -89,23 +89,26 @@ class build_ext_subclass(build_ext):
         import numpy
         self.include_dirs.append(numpy.get_include())
 
+
+with open('README.rst', 'r') as readme_file:
+    readme = readme_file.read()
+
 setup(
     name='pykdtree',
-    version='1.3.1',
+    version='1.3.5',
+    url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
+    long_description=readme,
     author='Esben S. Nielsen',
     author_email='storpipfugl@gmail.com',
     packages=['pykdtree'],
-    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+    python_requires='>=3.7',
     install_requires=['numpy'],
     setup_requires=['numpy'],
-    tests_require=['nose'],
+    tests_require=['pytest'],
     zip_safe=False,
-    test_suite='nose.collector',
-    ext_modules=[
-        Extension('pykdtree.kdtree',
-                  ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])
-    ],
+    ext_modules=[Extension('pykdtree.kdtree',
+                           ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
     cmdclass={'build_ext': build_ext_subclass},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
