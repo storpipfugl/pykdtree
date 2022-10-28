@@ -165,6 +165,8 @@ turned off by adding the following to `appveyor.yml` in the
 
 Changelog
 ---------
+v1.3.6 : Fix Python 3.11 compatibility and build Python 3.11 wheels
+
 v1.3.5 : Build Python 3.10 wheels and other CI updates
 
 v1.3.4 : Fix Python 3.9 wheels not being built for linux
