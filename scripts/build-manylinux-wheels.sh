@@ -25,7 +25,7 @@ mkdir -p /io/temp-wheels
 find /io/temp-wheels/ -type f -delete
 
 # Iterate through available pythons.
-for PY in cp3{7,8,9,10}; do
+for PY in cp3{7,8,9,10,11}; do
     for PYBIN in /opt/python/"${PY}"*/bin; do
         "${PYBIN}/pip" install -q -U setuptools wheel pytest build --cache-dir /io/pip-cache
         # Run the following in root of this repo.
