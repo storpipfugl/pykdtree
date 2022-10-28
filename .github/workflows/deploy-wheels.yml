@@ -51,7 +51,7 @@ jobs:
           git fetch --prune --unshallow
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.python-version }}"
 
@@ -81,7 +81,7 @@ jobs:
             /io/scripts/build-manylinux-wheels.sh
 
       - name: Upload wheel(s) as build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: dist/*.whl
@@ -91,12 +91,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download sdist artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: sdist
           path: dist
       - name: Download wheels artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: wheels
           path: dist
