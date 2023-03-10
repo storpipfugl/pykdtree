@@ -35,14 +35,93 @@ def is_conda_interpreter():
     """
     return 'conda' in sys.version or 'Continuum' in sys.version
 
+def is_macOS():
+    return 'darwin' in sys.platform
+
+
+# HOMEBREW_SAMPLE = """$ brew ls --verbose libomp
+# /opt/homebrew/Cellar/libomp/15.0.7/INSTALL_RECEIPT.json
+# /opt/homebrew/Cellar/libomp/15.0.7/.brew/libomp.rb
+# /opt/homebrew/Cellar/libomp/15.0.7/include/ompt.h
+# /opt/homebrew/Cellar/libomp/15.0.7/include/omp.h
+# /opt/homebrew/Cellar/libomp/15.0.7/include/omp-tools.h
+# /opt/homebrew/Cellar/libomp/15.0.7/lib/libomp.dylib
+# /opt/homebrew/Cellar/libomp/15.0.7/lib/libomp.a
+# """
+#
+# MACPORTS_SAMPLE = """$ port contents libomp
+# Port libomp contains:
+#   /opt/local/include/libomp/omp-tools.h
+#   /opt/local/include/libomp/omp.h
+#   /opt/local/include/libomp/ompt.h
+#   /opt/local/lib/libomp/libgomp.dylib
+#   /opt/local/lib/libomp/libiomp5.dylib
+#   /opt/local/lib/libomp/libomp.dylib
+#   /opt/local/share/doc/libomp/LICENSE.TXT
+#   /opt/local/share/doc/libomp/README.txt
+# """
+
+def macOS_list_brew_port(cmd):
+    from subprocess import run
+    lib = run(cmd + " | awk '/\/lib\// { print $1; }' | xargs -n1 dirname | uniq",
+              shell=True, check=False, capture_output=True)
+    inc = run(cmd + " | awk '/\/include\// { print $1; }' | xargs -n1 dirname | uniq",
+              shell=True, check=False, capture_output=True)
+    if lib.returncode == 0 and inc.returncode == 0:
+        return inc.stdout.decode("UTF-8").strip(), lib.stdout.decode("UTF-8").strip()
+    return None, None
+
+MACOS_OMP = None
+
+def macOS_libomp_known_locations():
+    """ Find common paths for libomp installation on macOS
+        return flags for compile and link as lists
+        e.g. (['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])
+    """
+    if not is_macOS():
+        return [], []
+    global MACOS_OMP
+    if MACOS_OMP:
+        return MACOS_OMP
+    for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
+        inc, lib = macOS_list_brew_port(cmd)
+        if inc and lib:
+            MACOS_OMP = [f"-I{inc}"], [f"-L{lib}"]
+            return MACOS_OMP
+    return [], []
+
+def is_macOS_with_libomp():
+    if not is_macOS():
+        return False
+    inc, lib = macOS_libomp_known_locations()
+    return bool(inc) and bool(lib)
+
+
+OMP_TAB = {
+    '1': 'gomp',
+    '0': None,
+    'gcc': 'gomp',
+    'gomp': 'gomp',
+    'clang': 'omp',
+    'omp': 'omp',
+    'guess': ('gomp' if (not is_macOS() or is_conda_interpreter())
+              else ('omp' if is_macOS_with_libomp() else None))
+}
+
+OMP_COMPILE_ARGS = {
+    'gomp': ['-fopenmp'],
+    'omp': ['-Xpreprocessor', '-fopenmp']
+}
+
+OMP_LINK_ARGS = {
+    'gomp': ['-lgomp'],
+    'omp': ['-lomp']
+}
 
 # Get OpenMP setting from environment
-try:
-    use_omp = int(os.environ['USE_OMP'])
-except KeyError:
-    # OpenMP is not supported with default clang
-    # Conda provides its own compiler which does support openmp
-    use_omp = 'darwin' not in sys.platform or is_conda_interpreter()
+# OpenMP is not supported with default clang
+# Conda provides its own compiler which does support openmp
+use_omp = OMP_TAB[os.environ.get('USE_OMP', 'guess')]
 
 
 def set_builtin(name, value):
@@ -56,14 +135,13 @@ def set_builtin(name, value):
 class build_ext_subclass(build_ext):
     def build_extensions(self):
         comp = self.compiler.compiler_type
+        omp_incl_loc, omp_link_loc = macOS_libomp_known_locations() if use_omp=="omp" else ([], [])
+        omp_comp = OMP_COMPILE_ARGS.get(use_omp, []) + omp_incl_loc
+        omp_link = OMP_LINK_ARGS.get(use_omp, []) + omp_link_loc
+        print(f">>>> {comp} {use_omp} {omp_comp} {omp_link}")
         if comp in ('unix', 'cygwin', 'mingw32'):
-            # Check if build is with OpenMP
-            if use_omp:
-                extra_compile_args = ['-std=c99', '-O3', '-fopenmp']
-                extra_link_args=['-lgomp']
-            else:
-                extra_compile_args = ['-std=c99', '-O3']
-                extra_link_args = []
+            extra_compile_args = ['-std=c99', '-O3'] + omp_comp
+            extra_link_args = omp_link
         elif comp == 'msvc':
             extra_compile_args = ['/Ox']
             extra_link_args = []
