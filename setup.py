@@ -17,6 +17,8 @@
 
 import os
 import sys
+import re
+from functools import lru_cache
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
@@ -61,41 +63,40 @@ def is_macOS():
 #   /opt/local/share/doc/libomp/README.txt
 # """
 
-def macOS_list_brew_port(cmd):
+
+def compile_link_paths_from_manifest(cmd):
     from subprocess import run
-    lib = run(cmd + " | awk '/\/lib\// { print $1; }' | xargs -n1 dirname | uniq",
-              shell=True, check=False, capture_output=True)
-    inc = run(cmd + " | awk '/\/include\// { print $1; }' | xargs -n1 dirname | uniq",
-              shell=True, check=False, capture_output=True)
-    if lib.returncode == 0 and inc.returncode == 0:
-        return inc.stdout.decode("UTF-8").strip(), lib.stdout.decode("UTF-8").strip()
-    return None, None
+    query = run(cmd, shell=True, check=False, capture_output=True)
+    if query.returncode != 0:
+        return None, None
+    manifest = query.stdout.decode("UTF-8")
+    # find all the unique directories mentioned in the manifest
+    dirs = set(os.path.split(filename)[0] for filename in re.findall(r'^\s*(/.*?)\s*$', manifest, re.MULTILINE))
+    # find a unique libdir and incdir
+    inc = tuple(d for d in dirs if '/include/' in d)
+    lib = tuple(d for d in dirs if '/lib/' in d)
+    # only return success if there's no ambiguity
+    return (inc + lib) if len(inc) == 1 and len(lib) == 1 else (None, None)
 
-MACOS_OMP = None
 
-def macOS_libomp_known_locations():
+@lru_cache(maxsize=1)
+def macOS_omp_options_from_probe():
     """ Find common paths for libomp installation on macOS
         return flags for compile and link as lists
         e.g. (['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])
     """
-    if not is_macOS():
-        return [], []
-    global MACOS_OMP
-    if MACOS_OMP:
-        return MACOS_OMP
-    for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
-        inc, lib = macOS_list_brew_port(cmd)
-        if inc and lib:
-            MACOS_OMP = [f"-I{inc}"], [f"-L{lib}"]
-            return MACOS_OMP
+    if is_macOS():
+        for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
+            inc, lib = compile_link_paths_from_manifest(cmd)
+            if inc and lib:
+                return [f"-I{inc}"], [f"-L{lib}"]
     return [], []
 
 def is_macOS_with_libomp():
     if not is_macOS():
         return False
-    inc, lib = macOS_libomp_known_locations()
+    inc, lib = macOS_omp_options_from_probe()
     return bool(inc) and bool(lib)
-
 
 OMP_TAB = {
     '1': 'gomp',
@@ -104,7 +105,7 @@ OMP_TAB = {
     'gomp': 'gomp',
     'clang': 'omp',
     'omp': 'omp',
-    'guess': ('gomp' if (not is_macOS() or is_conda_interpreter())
+    'probe': ('gomp' if (not is_macOS() or is_conda_interpreter())
               else ('omp' if is_macOS_with_libomp() else None))
 }
 
@@ -121,7 +122,7 @@ OMP_LINK_ARGS = {
 # Get OpenMP setting from environment
 # OpenMP is not supported with default clang
 # Conda provides its own compiler which does support openmp
-use_omp = OMP_TAB[os.environ.get('USE_OMP', 'guess')]
+use_omp = OMP_TAB[os.environ.get('USE_OMP', 'probe')]
 
 
 def set_builtin(name, value):
@@ -135,9 +136,9 @@ def set_builtin(name, value):
 class build_ext_subclass(build_ext):
     def build_extensions(self):
         comp = self.compiler.compiler_type
-        omp_incl_loc, omp_link_loc = macOS_libomp_known_locations() if use_omp=="omp" else ([], [])
-        omp_comp = OMP_COMPILE_ARGS.get(use_omp, []) + omp_incl_loc
-        omp_link = OMP_LINK_ARGS.get(use_omp, []) + omp_link_loc
+        omp_probed_incl_args, omp_probed_link_args = macOS_omp_options_from_probe() if use_omp=="omp" else ([], [])
+        omp_comp = OMP_COMPILE_ARGS.get(use_omp, []) + omp_probed_incl_args
+        omp_link = OMP_LINK_ARGS.get(use_omp, []) + omp_probed_link_args
         print(f">>>> {comp} {use_omp} {omp_comp} {omp_link}")
         if comp in ('unix', 'cygwin', 'mingw32'):
             extra_compile_args = ['-std=c99', '-O3'] + omp_comp
