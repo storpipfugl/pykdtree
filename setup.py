@@ -74,9 +74,10 @@ def macOS_list_brew_port(cmd):
 MACOS_OMP = None
 
 def macOS_libomp_known_locations():
-    """ Find common paths for libomp installation on macOS
-        return flags for compile and link as lists
-        e.g. (['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])
+    """Get common include and library paths for libomp installation on macOS.
+    
+    For example ``(['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])``.
+    
     """
     if not is_macOS():
         return [], []
