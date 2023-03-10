@@ -73,8 +73,8 @@ def compile_link_paths_from_manifest(cmd):
     # find all the unique directories mentioned in the manifest
     dirs = set(os.path.split(filename)[0] for filename in re.findall(r'^\s*(/.*?)\s*$', manifest, re.MULTILINE))
     # find a unique libdir and incdir
-    inc = tuple(d for d in dirs if '/include/' in d)
-    lib = tuple(d for d in dirs if '/lib/' in d)
+    inc = tuple(d for d in dirs if re.search(r'/include(\W|$)', d))
+    lib = tuple(d for d in dirs if re.search(r'/lib(\W|$)', d))
     # only return success if there's no ambiguity
     return (inc + lib) if len(inc) == 1 and len(lib) == 1 else (None, None)
 
