@@ -81,9 +81,8 @@ def compile_link_paths_from_manifest(cmd):
 
 @lru_cache(maxsize=1)
 def macOS_omp_options_from_probe():
-    """ Find common paths for libomp installation on macOS
-        return flags for compile and link as lists
-        e.g. (['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])
+    """Get common include and library paths for libomp installation on macOS.
+       For example ``(['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])``.
     """
     if is_macOS():
         for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
