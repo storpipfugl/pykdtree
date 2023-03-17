@@ -40,31 +40,34 @@ def is_conda_interpreter():
 def is_macOS():
     return 'darwin' in sys.platform
 
-
-# HOMEBREW_SAMPLE = """$ brew ls --verbose libomp
-# /opt/homebrew/Cellar/libomp/15.0.7/INSTALL_RECEIPT.json
-# /opt/homebrew/Cellar/libomp/15.0.7/.brew/libomp.rb
-# /opt/homebrew/Cellar/libomp/15.0.7/include/ompt.h
-# /opt/homebrew/Cellar/libomp/15.0.7/include/omp.h
-# /opt/homebrew/Cellar/libomp/15.0.7/include/omp-tools.h
-# /opt/homebrew/Cellar/libomp/15.0.7/lib/libomp.dylib
-# /opt/homebrew/Cellar/libomp/15.0.7/lib/libomp.a
-# """
-#
-# MACPORTS_SAMPLE = """$ port contents libomp
-# Port libomp contains:
-#   /opt/local/include/libomp/omp-tools.h
-#   /opt/local/include/libomp/omp.h
-#   /opt/local/include/libomp/ompt.h
-#   /opt/local/lib/libomp/libgomp.dylib
-#   /opt/local/lib/libomp/libiomp5.dylib
-#   /opt/local/lib/libomp/libomp.dylib
-#   /opt/local/share/doc/libomp/LICENSE.TXT
-#   /opt/local/share/doc/libomp/README.txt
-# """
-
-
 def compile_link_paths_from_manifest(cmd):
+    """Parse include and library paths from OSX package managers.
+
+    Example executions::
+
+        # Homebrew
+        $ brew ls --verbose libomp
+        /opt/homebrew/Cellar/libomp/15.0.7/INSTALL_RECEIPT.json
+        /opt/homebrew/Cellar/libomp/15.0.7/.brew/libomp.rb
+        /opt/homebrew/Cellar/libomp/15.0.7/include/ompt.h
+        /opt/homebrew/Cellar/libomp/15.0.7/include/omp.h
+        /opt/homebrew/Cellar/libomp/15.0.7/include/omp-tools.h
+        /opt/homebrew/Cellar/libomp/15.0.7/lib/libomp.dylib
+        /opt/homebrew/Cellar/libomp/15.0.7/lib/libomp.a
+
+        # MacPorts
+        $ port contents libomp
+        Port libomp contains:
+          /opt/local/include/libomp/omp-tools.h
+          /opt/local/include/libomp/omp.h
+          /opt/local/include/libomp/ompt.h
+          /opt/local/lib/libomp/libgomp.dylib
+          /opt/local/lib/libomp/libiomp5.dylib
+          /opt/local/lib/libomp/libomp.dylib
+          /opt/local/share/doc/libomp/LICENSE.TXT
+          /opt/local/share/doc/libomp/README.txt
+
+    """
     from subprocess import run
     query = run(cmd, shell=True, check=False, capture_output=True)
     if query.returncode != 0:
@@ -78,53 +81,40 @@ def compile_link_paths_from_manifest(cmd):
     # only return success if there's no ambiguity
     return (inc + lib) if len(inc) == 1 and len(lib) == 1 else (None, None)
 
-
-@lru_cache(maxsize=1)
 def macOS_omp_options_from_probe():
     """Get common include and library paths for libomp installation on macOS.
-    
+
     For example ``(['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])``.
-    
+
     """
-    if is_macOS():
-        for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
-            inc, lib = compile_link_paths_from_manifest(cmd)
-            if inc and lib:
-                return [f"-I{inc}"], [f"-L{lib}"]
+    for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
+        inc, lib = compile_link_paths_from_manifest(cmd)
+        if inc and lib:
+            return [f"-I{inc}"], [f"-L{lib}"]
     return [], []
 
-def is_macOS_with_libomp():
-    if not is_macOS():
-        return False
-    inc, lib = macOS_omp_options_from_probe()
-    return bool(inc) and bool(lib)
-
-OMP_TAB = {
-    '1': 'gomp',
+OMP_SETTING_TABLE = {
+    '1': 'probe',
     '0': None,
     'gcc': 'gomp',
     'gomp': 'gomp',
     'clang': 'omp',
     'omp': 'omp',
-    'probe': ('gomp' if (not is_macOS() or is_conda_interpreter())
-              else ('omp' if is_macOS_with_libomp() else None))
+    'msvc': 'msvc',
+    'probe': 'probe'
 }
 
 OMP_COMPILE_ARGS = {
     'gomp': ['-fopenmp'],
-    'omp': ['-Xpreprocessor', '-fopenmp']
+    'omp': ['-Xpreprocessor', '-fopenmp'],
+    'msvc': ['/openmp']
 }
 
 OMP_LINK_ARGS = {
     'gomp': ['-lgomp'],
-    'omp': ['-lomp']
+    'omp': ['-lomp'],
+    'msvc': []
 }
-
-# Get OpenMP setting from environment
-# OpenMP is not supported with default clang
-# Conda provides its own compiler which does support openmp
-use_omp = OMP_TAB[os.environ.get('USE_OMP', 'probe')]
-
 
 def set_builtin(name, value):
     if isinstance(__builtins__, dict):
@@ -135,20 +125,35 @@ def set_builtin(name, value):
 
 # Custom builder to handler compiler flags. Edit if needed.
 class build_ext_subclass(build_ext):
+
+    def _omp_compile_link_args(self, compiler):
+        # Get OpenMP setting from environment
+        use_omp = OMP_SETTING_TABLE[os.environ.get('USE_OMP', 'probe')]
+        # OpenMP is not supported with default clang
+        # Conda provides its own compiler which does support openmp
+        if use_omp in {'probe', 'omp'} and is_macOS() and not is_conda_interpreter():
+            macos_compile_args, macos_link_args = macOS_omp_options_from_probe()
+            if macos_compile_args is not None and macos_link_args is not None:
+                # we found a libomp that we should be able to use
+                use_omp = 'omp'
+                return use_omp, macos_compile_args + OMP_COMPILE_ARGS[use_omp], macos_link_args + OMP_LINK_ARGS[use_omp]
+            else:
+                # likely default system clang compiler with no libomp in typical locations
+                use_omp = None
+        if use_omp == 'probe':
+            use_omp = 'msvc' if compiler == 'msvc' else 'gomp'
+        return use_omp, OMP_COMPILE_ARGS.get(use_omp, []), OMP_LINK_ARGS.get(use_omp, [])
+
     def build_extensions(self):
         comp = self.compiler.compiler_type
-        omp_probed_incl_args, omp_probed_link_args = macOS_omp_options_from_probe() if use_omp=="omp" else ([], [])
-        omp_comp = OMP_COMPILE_ARGS.get(use_omp, []) + omp_probed_incl_args
-        omp_link = OMP_LINK_ARGS.get(use_omp, []) + omp_probed_link_args
+        use_omp, omp_comp, omp_link = self._omp_compile_link_args(comp)
         print(f">>>> {comp} {use_omp} {omp_comp} {omp_link}")
         if comp in ('unix', 'cygwin', 'mingw32'):
             extra_compile_args = ['-std=c99', '-O3'] + omp_comp
             extra_link_args = omp_link
         elif comp == 'msvc':
-            extra_compile_args = ['/Ox']
-            extra_link_args = []
-            if use_omp:
-                extra_compile_args.append('/openmp')
+            extra_compile_args = ['/Ox'] + omp_comp
+            extra_link_args = omp_link
         else:
             # Add support for more compilers here
             raise ValueError('Compiler flags undefined for %s. Please modify setup.py and add compiler flags'
