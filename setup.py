@@ -91,7 +91,7 @@ def _omp_compile_link_args(compiler):
     compile_args = []
     link_args = []
     if use_omp == "probe":
-        use_omp, compile_args, link_args = _probe_omp_for_compiler_and_platform()
+        use_omp, compile_args, link_args = _probe_omp_for_compiler_and_platform(compiler)
 
     print(f"Will use {use_omp} for OpenMP." if use_omp else "OpenMP support not available.")
     compile_args += OMP_COMPILE_ARGS.get(use_omp, [])
@@ -100,7 +100,7 @@ def _omp_compile_link_args(compiler):
     return compile_args, link_args
 
 
-def _probe_omp_for_compiler_and_platform():
+def _probe_omp_for_compiler_and_platform(compiler):
     compile_args = []
     link_args = []
     if compiler == "msvc":
