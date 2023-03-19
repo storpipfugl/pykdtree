@@ -129,25 +129,35 @@ class build_ext_subclass(build_ext):
     def _omp_compile_link_args(self, compiler):
         # Get OpenMP setting from environment
         use_omp = OMP_SETTING_TABLE[os.environ.get('USE_OMP', 'probe')]
-        # OpenMP is not supported with default clang
-        # Conda provides its own compiler which does support openmp
-        if use_omp in {'probe', 'omp'} and is_macOS() and not is_conda_interpreter():
-            macos_compile_args, macos_link_args = macOS_omp_options_from_probe()
-            if macos_compile_args is not None and macos_link_args is not None:
-                # we found a libomp that we should be able to use
-                use_omp = 'omp'
-                return use_omp, macos_compile_args + OMP_COMPILE_ARGS[use_omp], macos_link_args + OMP_LINK_ARGS[use_omp]
+
+        compile_args = []
+        link_args = []
+        if use_omp == "probe":
+            if compiler == "msvc":
+                use_omp = "msvc"
+            elif is_conda_interpreter():
+                # Conda provides its own compiler which does support openmp
+                use_omp = "gomp"
+            elif is_macOS():
+                # OpenMP is not supported with system clang but homebrew and macports have libomp packages
+                compile_args, link_args = macOS_omp_options_from_probe()
+                if not (compile_args or link_args):
+                    print("Probe for libomp failed, skipping use of OpenMP with clang.")
+                    print("It may be possible to build with OpenMP using USE_OMP=clang with CFLAGS and LDFLAGS explicit settings to use libomp.")
+                    use_omp = None
+                else:
+                    use_omp = "omp"
             else:
-                # likely default system clang compiler with no libomp in typical locations
-                use_omp = None
-        if use_omp == 'probe':
-            use_omp = 'msvc' if compiler == 'msvc' else 'gomp'
-        return use_omp, OMP_COMPILE_ARGS.get(use_omp, []), OMP_LINK_ARGS.get(use_omp, [])
+                use_omp = "gomp"
+        print(f"Will use {use_omp} for OpenMP." if use_omp else "OpenMP support not available.")
+        compile_args += OMP_COMPILE_ARGS.get(use_omp, [])
+        link_args += OMP_LINK_ARGS.get(use_omp, [])
+        print(f"Compiler: {compiler} / OpenMP: {use_omp} / OpenMP compile args: {compile_args} / OpenMP link args: {link_args}")
+        return compile_args, link_args
 
     def build_extensions(self):
         comp = self.compiler.compiler_type
-        use_omp, omp_comp, omp_link = self._omp_compile_link_args(comp)
-        print(f">>>> {comp} {use_omp} {omp_comp} {omp_link}")
+        omp_comp, omp_link = self._omp_compile_link_args(comp)
         if comp in ('unix', 'cygwin', 'mingw32'):
             extra_compile_args = ['-std=c99', '-O3'] + omp_comp
             extra_link_args = omp_link
