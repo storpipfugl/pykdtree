@@ -31,16 +31,17 @@ Or, if in a conda-based environment, with conda from the conda-forge channel:
 
     conda install -c conda-forge pykdtree
     
-Note that by default these packages are only built with OpenMP for linux platforms.
+Note that by default these packages (the binary wheels on PyPI and the binary
+package on conda-forge) are only built with OpenMP for linux platforms.
 To attempt to build from source with OpenMP support do:
 
 .. code-block:: bash
 
-    export USE_OMP=1
+    export USE_OMP="probe"
     pip install --no-binary pykdtree pykdtree
     
 This may not work on some systems that don't have OpenMP installed. See the below development
-instructions for more guidance. Disabling OpenMP can be accomplished by setting `USE_OMP` to `0`
+instructions for more guidance. Disabling OpenMP can be accomplished by setting `USE_OMP` to ``"0"``
 in the above commands.
 
 Development Installation
@@ -81,6 +82,26 @@ Note evironment variables are by default not exported when using sudo so in this
 .. code-block:: bash
 
     $ USE_OMP=0 sudo -E pip install -e .
+
+
+Control OpenMP usage
+^^^^^^^^^^^^^^^^^^^^
+
+The ``USE_OMP`` variable can be set to one of a couple different options. If
+set to ``"probe"``, the installation process (``setup.py``) will attempt to
+determine what variant of OpenMP is available based on the compiler being used,
+the platform being run on, and the Python environment being run with. It will
+then use the flags specified by one of the other ``USE_OMP`` modes. Note that
+in the case of MacOS, it will also try to identify if OpenMP is available from
+macports or homebrew and include the necessary include and library paths.
+
+If set to ``"gcc"`` or ``"gomp"`` then compiler and linking flags will be set
+appropriately for "GNU OpenMP" (gomp) library. If set to ``"clang"`` or 
+``"omp"`` then the flags will be set to support the "omp" library. If set to
+``"msvc"`` then flags will be set for the Microsoft Visual C++ compiler's
+OpenMP variant. For backwards compatibility the previous ``"1"`` has the same
+behavior as ``"probe"``. As mentioned above ``"0"`` can be used to disable
+any detection of OpenMP or attempt to compile with it.
 
 Usage
 -----
