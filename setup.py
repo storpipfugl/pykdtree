@@ -201,7 +201,7 @@ with open('README.rst', 'r') as readme_file:
 
 setup(
     name='pykdtree',
-    version='1.3.6',
+    version='1.3.7',
     url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     long_description=readme,
