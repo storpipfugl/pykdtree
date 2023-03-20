@@ -22,7 +22,107 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
 
-def is_conda_interpreter():
+OMP_SETTING_TABLE = {
+    '1': 'probe',
+    '0': None,
+    'gcc': 'gomp',
+    'gomp': 'gomp',
+    'clang': 'omp',
+    'omp': 'omp',
+    'msvc': 'msvc',
+    'probe': 'probe'
+}
+
+OMP_COMPILE_ARGS = {
+    'gomp': ['-fopenmp'],
+    'omp': ['-Xpreprocessor', '-fopenmp'],
+    'msvc': ['/openmp']
+}
+
+OMP_LINK_ARGS = {
+    'gomp': ['-lgomp'],
+    'omp': ['-lomp'],
+    'msvc': []
+}
+
+def set_builtin(name, value):
+    if isinstance(__builtins__, dict):
+        __builtins__[name] = value
+    else:
+        setattr(__builtins__, name, value)
+
+
+class build_ext_subclass(build_ext):
+
+    def build_extensions(self):
+        comp = self.compiler.compiler_type
+        omp_comp, omp_link = _omp_compile_link_args(comp)
+        if comp in ('unix', 'cygwin', 'mingw32'):
+            extra_compile_args = ['-std=c99', '-O3'] + omp_comp
+            extra_link_args = omp_link
+        elif comp == 'msvc':
+            extra_compile_args = ['/Ox'] + omp_comp
+            extra_link_args = omp_link
+        else:
+            # Add support for more compilers here
+            raise ValueError('Compiler flags undefined for %s. Please modify setup.py and add compiler flags'
+                             % comp)
+        self.extensions[0].extra_compile_args = extra_compile_args
+        self.extensions[0].extra_link_args = extra_link_args
+        build_ext.build_extensions(self)
+
+    def finalize_options(self):
+        '''
+        In order to avoid premature import of numpy before it gets installed as a dependency
+        get numpy include directories during the extensions building process
+        http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py
+        '''
+        build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        set_builtin('__NUMPY_SETUP__', False)
+        import numpy
+        self.include_dirs.append(numpy.get_include())
+
+
+def _omp_compile_link_args(compiler):
+    # Get OpenMP setting from environment
+    use_omp = OMP_SETTING_TABLE[os.environ.get('USE_OMP', 'probe')]
+
+    compile_args = []
+    link_args = []
+    if use_omp == "probe":
+        use_omp, compile_args, link_args = _probe_omp_for_compiler_and_platform(compiler)
+
+    print(f"Will use {use_omp} for OpenMP." if use_omp else "OpenMP support not available.")
+    compile_args += OMP_COMPILE_ARGS.get(use_omp, [])
+    link_args += OMP_LINK_ARGS.get(use_omp, [])
+    print(f"Compiler: {compiler} / OpenMP: {use_omp} / OpenMP compile args: {compile_args} / OpenMP link args: {link_args}")
+    return compile_args, link_args
+
+
+def _probe_omp_for_compiler_and_platform(compiler):
+    compile_args = []
+    link_args = []
+    if compiler == "msvc":
+        use_omp = "msvc"
+    elif _is_conda_interpreter():
+        # Conda provides its own compiler which does support openmp
+        use_omp = "gomp"
+    elif _is_macOS():
+        # OpenMP is not supported with system clang but homebrew and macports have libomp packages
+        compile_args, link_args = _macOS_omp_options_from_probe()
+        if not (compile_args or link_args):
+            print("Probe for libomp failed, skipping use of OpenMP with clang.")
+            print("It may be possible to build with OpenMP using USE_OMP=clang with CFLAGS and LDFLAGS explicit settings to use libomp.")
+            use_omp = None
+        else:
+            use_omp = "omp"
+    else:
+        use_omp = "gomp"
+    return use_omp, compile_args, link_args
+
+
+def _is_conda_interpreter():
     """Is the running interpreter from Anaconda or miniconda?
 
     See https://stackoverflow.com/a/21318941/433202
@@ -36,10 +136,25 @@ def is_conda_interpreter():
     """
     return 'conda' in sys.version or 'Continuum' in sys.version
 
-def is_macOS():
+
+def _is_macOS():
     return 'darwin' in sys.platform
 
-def compile_link_paths_from_manifest(cmd):
+
+def _macOS_omp_options_from_probe():
+    """Get common include and library paths for libomp installation on macOS.
+
+    For example ``(['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])``.
+
+    """
+    for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
+        inc, lib = _compile_link_paths_from_manifest(cmd)
+        if inc and lib:
+            return [f"-I{inc}"], [f"-L{lib}"]
+    return [], []    
+
+
+def _compile_link_paths_from_manifest(cmd):
     """Parse include and library paths from OSX package managers.
 
     Example executions::
@@ -80,108 +195,6 @@ def compile_link_paths_from_manifest(cmd):
     # only return success if there's no ambiguity
     return (inc + lib) if len(inc) == 1 and len(lib) == 1 else (None, None)
 
-def macOS_omp_options_from_probe():
-    """Get common include and library paths for libomp installation on macOS.
-
-    For example ``(['-I/opt/local/include/libomp'], ['-L/opt/local/lib/libomp'])``.
-
-    """
-    for cmd in ["brew ls --verbose libomp", "port contents libomp"]:
-        inc, lib = compile_link_paths_from_manifest(cmd)
-        if inc and lib:
-            return [f"-I{inc}"], [f"-L{lib}"]
-    return [], []
-
-OMP_SETTING_TABLE = {
-    '1': 'probe',
-    '0': None,
-    'gcc': 'gomp',
-    'gomp': 'gomp',
-    'clang': 'omp',
-    'omp': 'omp',
-    'msvc': 'msvc',
-    'probe': 'probe'
-}
-
-OMP_COMPILE_ARGS = {
-    'gomp': ['-fopenmp'],
-    'omp': ['-Xpreprocessor', '-fopenmp'],
-    'msvc': ['/openmp']
-}
-
-OMP_LINK_ARGS = {
-    'gomp': ['-lgomp'],
-    'omp': ['-lomp'],
-    'msvc': []
-}
-
-def set_builtin(name, value):
-    if isinstance(__builtins__, dict):
-        __builtins__[name] = value
-    else:
-        setattr(__builtins__, name, value)
-
-
-# Custom builder to handler compiler flags. Edit if needed.
-class build_ext_subclass(build_ext):
-
-    def _omp_compile_link_args(self, compiler):
-        # Get OpenMP setting from environment
-        use_omp = OMP_SETTING_TABLE[os.environ.get('USE_OMP', 'probe')]
-
-        compile_args = []
-        link_args = []
-        if use_omp == "probe":
-            if compiler == "msvc":
-                use_omp = "msvc"
-            elif is_conda_interpreter():
-                # Conda provides its own compiler which does support openmp
-                use_omp = "gomp"
-            elif is_macOS():
-                # OpenMP is not supported with system clang but homebrew and macports have libomp packages
-                compile_args, link_args = macOS_omp_options_from_probe()
-                if not (compile_args or link_args):
-                    print("Probe for libomp failed, skipping use of OpenMP with clang.")
-                    print("It may be possible to build with OpenMP using USE_OMP=clang with CFLAGS and LDFLAGS explicit settings to use libomp.")
-                    use_omp = None
-                else:
-                    use_omp = "omp"
-            else:
-                use_omp = "gomp"
-        print(f"Will use {use_omp} for OpenMP." if use_omp else "OpenMP support not available.")
-        compile_args += OMP_COMPILE_ARGS.get(use_omp, [])
-        link_args += OMP_LINK_ARGS.get(use_omp, [])
-        print(f"Compiler: {compiler} / OpenMP: {use_omp} / OpenMP compile args: {compile_args} / OpenMP link args: {link_args}")
-        return compile_args, link_args
-
-    def build_extensions(self):
-        comp = self.compiler.compiler_type
-        omp_comp, omp_link = self._omp_compile_link_args(comp)
-        if comp in ('unix', 'cygwin', 'mingw32'):
-            extra_compile_args = ['-std=c99', '-O3'] + omp_comp
-            extra_link_args = omp_link
-        elif comp == 'msvc':
-            extra_compile_args = ['/Ox'] + omp_comp
-            extra_link_args = omp_link
-        else:
-            # Add support for more compilers here
-            raise ValueError('Compiler flags undefined for %s. Please modify setup.py and add compiler flags'
-                             % comp)
-        self.extensions[0].extra_compile_args = extra_compile_args
-        self.extensions[0].extra_link_args = extra_link_args
-        build_ext.build_extensions(self)
-
-    def finalize_options(self):
-        '''
-        In order to avoid premature import of numpy before it gets installed as a dependency
-        get numpy include directories during the extensions building process
-        http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py
-        '''
-        build_ext.finalize_options(self)
-        # Prevent numpy from thinking it is still in its setup process:
-        set_builtin('__NUMPY_SETUP__', False)
-        import numpy
-        self.include_dirs.append(numpy.get_include())
 
 with open('README.rst', 'r') as readme_file:
     readme = readme_file.read()
@@ -213,3 +226,4 @@ setup(
       'Topic :: Scientific/Engineering'
       ]
     )
+
