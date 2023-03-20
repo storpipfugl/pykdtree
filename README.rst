@@ -95,7 +95,7 @@ then use the flags specified by one of the other ``USE_OMP`` modes. Note that
 in the case of MacOS, it will also try to identify if OpenMP is available from
 macports or homebrew and include the necessary include and library paths.
 
-If set to ``"gcc"`` or ``"gcomp"`` then compiler and linking flags will be set
+If set to ``"gcc"`` or ``"gomp"`` then compiler and linking flags will be set
 appropriately for "GNU OpenMP" (gomp) library. If set to ``"clang"`` or 
 ``"omp"`` then the flags will be set to support the "omp" library. If set to
 ``"msvc"`` then flags will be set for the Microsoft Visual C++ compiler's
