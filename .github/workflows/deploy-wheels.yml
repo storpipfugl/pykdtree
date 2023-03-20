@@ -61,8 +61,10 @@ jobs:
 
       - name: Build and install macOS/Windows wheel
         if: matrix.os != 'ubuntu-latest'
+        env:
+          USE_OMP: 0
         run: |
-          python setup.py -q bdist_wheel
+          python setup.py -v -q bdist_wheel
           pip install --find-links=./dist/ pykdtree
 
       - name: Test
