@@ -143,21 +143,25 @@ Params:
 ************************************************/
 void insert_point_float(uint32_t *closest_idx, float *closest_dist, uint32_t pidx, float cur_dist, uint32_t k)
 {
-    int i;
-    for (i = k - 1; i > 0; i--)
-    {
-        if (closest_dist[i - 1] > cur_dist)
-        {
-            closest_dist[i] = closest_dist[i - 1];
-            closest_idx[i] = closest_idx[i - 1];
-        }
-        else
-        {
+    float tmp_dist;
+    uint32_t tmp_idx;
+
+    closest_dist[k - 1] = cur_dist;
+    closest_idx[k - 1] = pidx;
+
+    /* Bubble the newly inserted point up through the priority queue */
+    for (int j = k - 1; j > 0; j--) {
+        if (closest_dist[j - 1] > closest_dist[j]) {
+            tmp_dist = closest_dist[j];
+            tmp_idx = closest_idx[j];
+            closest_dist[j] = closest_dist[j - 1];
+            closest_idx[j] = closest_idx[j - 1];
+            closest_dist[j - 1] = tmp_dist;
+            closest_idx[j - 1] = tmp_idx;
+        } else {
             break;
         }
     }
-    closest_idx[i] = pidx;
-    closest_dist[i] = cur_dist;
 }
 
 /************************************************
@@ -785,23 +789,27 @@ Params:
     cur_dist : distance to point inserted
     k : number of neighbours
 ************************************************/
-void insert_point_double(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k)
+inline void insert_point_double(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k)
 {
-    int i;
-    for (i = k - 1; i > 0; i--)
-    {
-        if (closest_dist[i - 1] > cur_dist)
-        {
-            closest_dist[i] = closest_dist[i - 1];
-            closest_idx[i] = closest_idx[i - 1];
-        }
-        else
-        {
+    double tmp_dist;
+    uint32_t tmp_idx;
+
+    closest_dist[k - 1] = cur_dist;
+    closest_idx[k - 1] = pidx;
+
+    /* Bubble the newly inserted point up through the priority queue */
+    for (int j = k - 1; j > 0; j--) {
+        if (closest_dist[j - 1] > closest_dist[j]) {
+            tmp_dist = closest_dist[j];
+            tmp_idx = closest_idx[j];
+            closest_dist[j] = closest_dist[j - 1];
+            closest_idx[j] = closest_idx[j - 1];
+            closest_dist[j - 1] = tmp_dist;
+            closest_idx[j - 1] = tmp_idx;
+        } else {
             break;
         }
     }
-    closest_idx[i] = pidx;
-    closest_dist[i] = cur_dist;
 }
 
 /************************************************
@@ -813,7 +821,7 @@ Params:
     n : number of points
     bbox : bounding box (return)
 ************************************************/
-void get_bounding_box_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, double *bbox)
+inline void get_bounding_box_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, double *bbox)
 {
     double cur;
     int8_t i, j;
@@ -979,7 +987,7 @@ Params:
     bsp : number of points per leaf
     bbox : bounding box of set of data points
 ************************************************/
-Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, double *bbox)
+inline Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, double *bbox)
 {
     /* Create new node */
     int is_leaf = (n <= bsp);
@@ -1140,7 +1148,7 @@ Params:
     point1_coord : point 1
     point2_coord : point 2
 ************************************************/
-double calc_dist_double(double *point1_coord, double *point2_coord, int8_t no_dims)
+inline double calc_dist_double(double *point1_coord, double *point2_coord, int8_t no_dims)
 {
     /* Calculate squared distance */
     double dist = 0, dim_dist;
@@ -1160,7 +1168,7 @@ Params:
     point_coord : cartesian coordinates of point
     bbox : cube
 ************************************************/
-double get_cube_offset_double(int8_t dim, double *point_coord, double *bbox)
+inline double get_cube_offset_double(int8_t dim, double *point_coord, double *bbox)
 {
     double dim_coord = point_coord[dim];
 
@@ -1188,7 +1196,7 @@ Params:
     no_dims : number of dimensions
     bbox : cube
 ************************************************/
-double get_min_dist_double(double *point_coord, int8_t no_dims, double *bbox)
+inline double get_min_dist_double(double *point_coord, int8_t no_dims, double *bbox)
 {
     double cube_offset = 0, cube_offset_dim;
     int8_t i;
@@ -1246,7 +1254,7 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_double_mask(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
+inline void search_leaf_double_mask(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
                                uint32_t k, uint8_t *mask, uint32_t *restrict closest_idx, double *restrict closest_dist)
 {
     double cur_dist;
