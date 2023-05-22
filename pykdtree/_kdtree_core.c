@@ -141,7 +141,7 @@ Params:
     cur_dist : distance to point inserted
     k : number of neighbours
 ************************************************/
-void insert_point_float(uint32_t *closest_idx, float *closest_dist, uint32_t pidx, float cur_dist, uint32_t k)
+inline void insert_point_float(uint32_t *closest_idx, float *closest_dist, uint32_t pidx, float cur_dist, uint32_t k)
 {
     float tmp_dist;
     uint32_t tmp_idx;
@@ -173,7 +173,7 @@ Params:
     n : number of points
     bbox : bounding box (return)
 ************************************************/
-void get_bounding_box_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, float *bbox)
+inline void get_bounding_box_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, float *bbox)
 {
     float cur;
     int8_t i, j;
@@ -339,7 +339,7 @@ Params:
     bsp : number of points per leaf
     bbox : bounding box of set of data points
 ************************************************/
-Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, float *bbox)
+inline Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, float *bbox)
 {
     /* Create new node */
     int is_leaf = (n <= bsp);
@@ -500,7 +500,7 @@ Params:
     point1_coord : point 1
     point2_coord : point 2
 ************************************************/
-float calc_dist_float(float *point1_coord, float *point2_coord, int8_t no_dims)
+inline float calc_dist_float(float *point1_coord, float *point2_coord, int8_t no_dims)
 {
     /* Calculate squared distance */
     float dist = 0, dim_dist;
@@ -520,7 +520,7 @@ Params:
     point_coord : cartesian coordinates of point
     bbox : cube
 ************************************************/
-float get_cube_offset_float(int8_t dim, float *point_coord, float *bbox)
+inline float get_cube_offset_float(int8_t dim, float *point_coord, float *bbox)
 {
     float dim_coord = point_coord[dim];
 
@@ -548,7 +548,7 @@ Params:
     no_dims : number of dimensions
     bbox : cube
 ************************************************/
-float get_min_dist_float(float *point_coord, int8_t no_dims, float *bbox)
+inline float get_min_dist_float(float *point_coord, int8_t no_dims, float *bbox)
 {
     float cube_offset = 0, cube_offset_dim;
     int8_t i;
@@ -574,7 +574,7 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
+inline void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
                  uint32_t k, uint32_t *restrict closest_idx, float *restrict closest_dist)
 {
     float cur_dist;
@@ -606,7 +606,7 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_float_mask(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
+inline void search_leaf_float_mask(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
                                uint32_t k, uint8_t *mask, uint32_t *restrict closest_idx, float *restrict closest_dist)
 {
     float cur_dist;
@@ -1222,7 +1222,7 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
+inline void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
                  uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist)
 {
     double cur_dist;
