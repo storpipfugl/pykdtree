@@ -120,12 +120,16 @@ void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_
                  uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist);
 void search_leaf_double_mask(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
                  uint32_t k, uint8_t *restrict mask, uint32_t *restrict closest_idx, double *restrict closest_dist);
-void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord,
-                      double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint8_t *mask, uint32_t *  closest_idx, double *closest_dist);
-void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
-                 uint32_t num_points, uint32_t k,  double distance_upper_bound,
-                 double eps, uint8_t *mask, uint32_t *closest_idxs, double *closest_dists);
-
+void search_splitnode_double(Node_double *root, const double *pa, const uint32_t *pidx,
+                             int8_t no_dims, const double *point_coord,
+                             double min_dist, uint32_t k,
+                             double distance_upper_bound, double eps_fac,
+                             const uint8_t *mask, uint32_t *closest_idx,
+                             double *closest_dist);
+void search_tree_double(const Tree_double *tree, const double *pa, const double *point_coords,
+                        uint32_t num_points, uint32_t k,
+                        double distance_upper_bound, double eps, const uint8_t *mask,
+                        uint32_t *closest_idxs, double *closest_dists);
 
 
 /************************************************
@@ -1278,9 +1282,12 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
-                      double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint8_t *mask,
-                      uint32_t *closest_idx, double *closest_dist)
+void search_splitnode_double(Node_double *root, const double *pa, const uint32_t *pidx,
+                             int8_t no_dims, const double *point_coord,
+                             double min_dist, uint32_t k,
+                             double distance_upper_bound, double eps_fac,
+                             const uint8_t *mask, uint32_t *closest_idx,
+                             double *closest_dist)
 {
     int8_t dim;
     double dist_left, dist_right;
@@ -1376,9 +1383,10 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
-                 uint32_t num_points, uint32_t k, double distance_upper_bound,
-                 double eps, uint8_t *mask, uint32_t *closest_idxs, double *closest_dists)
+void search_tree_double(const Tree_double *tree, const double *pa, const double *point_coords,
+                        uint32_t num_points, uint32_t k,
+                        double distance_upper_bound, double eps, const uint8_t *mask,
+                        uint32_t *closest_idxs, double *closest_dists)
 {
     double min_dist;
     double eps_fac = 1 / ((1 + eps) * (1 + eps));
