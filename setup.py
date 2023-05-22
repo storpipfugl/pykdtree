@@ -214,7 +214,7 @@ setup(
     tests_require=['pytest'],
     zip_safe=False,
     ext_modules=[Extension('pykdtree.kdtree',
-                           ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
+                           ['pykdtree/kdtree.pyx', 'pykdtree/_kdtree_core.c'])],
     cmdclass={'build_ext': build_ext_subclass},
     classifiers=[
       'Development Status :: 5 - Production/Stable',

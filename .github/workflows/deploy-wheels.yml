@@ -64,7 +64,7 @@ jobs:
         env:
           USE_OMP: 0
         run: |
-          python setup.py -v -q bdist_wheel
+          pip wheel --no-deps . -w dist
           pip install --find-links=./dist/ pykdtree
 
       - name: Test
