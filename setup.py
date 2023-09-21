@@ -186,7 +186,7 @@ with open('README.rst', 'r') as readme_file:
     readme = readme_file.read()
 
 extensions = [
-    Extension('pykdtree.kdtree', sources=['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'],
+    Extension('pykdtree.kdtree', sources=['pykdtree/kdtree.pyx', 'pykdtree/_kdtree_core.c'],
               include_dirs=[np.get_include()],
               ),
 ]
