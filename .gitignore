@@ -1,9 +1,6 @@
 ### PYTHON IGNORES ###
 *.py[cod]
 
-# C extensions
-*.so
-
 # Packages
 *.egg
 *.egg-info
@@ -59,6 +56,4 @@ nosetests.xml
 .idea
 
 # don't include Cython C extensions
-pyresample/ewa/_fornav.cpp
-pyresample/ewa/_ll2cr.c
-pyresample/gradient/_gradient_search.c
+pykdtree/kdtree.c
