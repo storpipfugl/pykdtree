@@ -32,7 +32,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019, macos-11, ubuntu-20.04]
+        os: [windows-2019, macos-11]
+        include:
+          - os: "ubuntu-20.04"
+            env:
+              CIBW_ARCHS_LINUX: "aarch64"
+              CIBW_BUILD: "cp39-* cp10-*"
+          - os: "ubuntu-20.04"
+            env:
+              CIBW_ARCHS_LINUX: "auto"
+              CIBW_BUILD: "cp39-* cp10-*"
+          - os: "ubuntu-20.04"
+            env:
+              CIBW_ARCHS_LINUX: "aarch64"
+              CIBW_BUILD: "cp311-* cp12-*"
+          - os: "ubuntu-20.04"
+            env:
+              CIBW_ARCHS_LINUX: "auto"
+              CIBW_BUILD: "cp311-* cp112-*"
 
     steps:
       - uses: actions/checkout@v4
@@ -49,12 +66,11 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.0
         env:
           CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *i686 *-musllinux_aarch64"
-          CIBW_ARCHS_LINUX: "auto aarch64"
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ARCHS_WINDOWS: "AMD64 ARM64"
           CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
           CIBW_TEST_REQUIRES: "pytest"
-          CIBW_TEST_SKIP: "*-win_arm64"
+          CIBW_TEST_SKIP: "*_arm64 *_universal2:arm64"
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v3
