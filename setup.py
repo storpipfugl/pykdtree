@@ -201,14 +201,14 @@ with open('README.rst', 'r') as readme_file:
 
 setup(
     name='pykdtree',
-    version='1.3.7.post0',
+    version='1.3.9',
     url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     long_description=readme,
     author='Esben S. Nielsen',
     author_email='storpipfugl@gmail.com',
     packages=['pykdtree'],
-    python_requires='>=3.7',
+    python_requires='>=3.9',
     install_requires=['numpy'],
     setup_requires=['numpy'],
     tests_require=['pytest'],
