@@ -1,5 +1,5 @@
 ---
-name: Build Test Deploy
+name: Build sdist and wheels
 
 on:
   push:
