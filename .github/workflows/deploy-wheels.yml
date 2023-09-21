@@ -39,11 +39,19 @@ jobs:
       - run: |
           git fetch --prune --unshallow
 
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.0
         env:
-          CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-manylinux_i686 *-musllinux*"
-          CIBW_ARCHS: auto64
+          CIBW_SKIP: "cp36-* cp37-* cp38-* pp*"
+          CIBW_ARCHS_LINUX: "auto aarch64 ppc64le s390x"
+          CIBW_ARCHS_MACOS: "x86_64 arm64"
+          CIBW_ARCHS_WINDOWS: "AMD64 ARM64"
           CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
           CIBW_TEST_REQUIRES: "pytest"
 
