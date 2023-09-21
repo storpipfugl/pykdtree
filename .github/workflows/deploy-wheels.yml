@@ -45,6 +45,7 @@ jobs:
           CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-manylinux_i686 *-musllinux*"
           CIBW_ARCHS: auto64
           CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
+          CIBW_TEST_REQUIRES: "pytest"
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v3
