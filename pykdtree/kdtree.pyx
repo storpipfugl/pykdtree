@@ -267,7 +267,7 @@ cdef class KDTree:
             else:
                 idx_out = (closest_dists_res >= dub_double)
 
-            closest_dists_res[idx_out] = np.Inf
+            closest_dists_res[idx_out] = np.inf
             closest_idxs_res[idx_out] = self.n
 
         if not sqr_dists: # Return actual cartesian distances
