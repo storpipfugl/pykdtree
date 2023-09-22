@@ -33,25 +33,21 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-2019, macos-11]
-        cibw_build: [""]
-        cibw_archs_linux: [""]
+        cibw_build: []
+        cibw_archs_linux: []
         include:
           - os: "ubuntu-20.04"
-            env:
-              cibw_archs_linux: "aarch64"
-              cibw_build: "cp39-* cp10-*"
+            cibw_archs_linux: "aarch64"
+            cibw_build: "cp39-* cp10-*"
           - os: "ubuntu-20.04"
-            env:
-              cibw_archs_linux: "auto"
-              cibw_build: "cp39-* cp10-*"
+            cibw_archs_linux: "auto"
+            cibw_build: "cp39-* cp10-*"
           - os: "ubuntu-20.04"
-            env:
-              cibw_archs_linux: "aarch64"
-              cibw_build: "cp311-* cp12-*"
+            cibw_archs_linux: "aarch64"
+            cibw_build: "cp311-* cp12-*"
           - os: "ubuntu-20.04"
-            env:
-              cibw_archs_linux: "auto"
-              cibw_build: "cp311-* cp112-*"
+            cibw_archs_linux: "auto"
+            cibw_build: "cp311-* cp112-*"
 
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +60,7 @@ jobs:
         with:
           platforms: all
 
-      - name: Build wheels
+      - name: Build wheels ${{ matrix.cibw_archs_linux }} ${{ matrix.cibw_build }}
         uses: pypa/cibuildwheel@v2.16.0
         env:
           CIBW_BUILD: "${{ matrix.cibw_build }}"
