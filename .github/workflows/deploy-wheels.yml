@@ -1,5 +1,5 @@
 ---
-name: Build Test Deploy
+name: Build sdist and wheels
 
 on:
   push:
@@ -27,62 +27,46 @@ jobs:
           path: dist/*.tar.gz
 
   build_wheels:
+    name: "Build wheels on ${{ matrix.os }} ${{ matrix.cibw_archs }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         include:
-          # Using pythons inside a docker image to provide all the Linux
-          # python-versions permutations.
-          - name: manylinux_2_24 64-bit
-            os: ubuntu-latest
-            python-version: 3.8
-            docker-image: manylinux_2_24_x86_64
+          - os: windows-2019
+            cibw_archs: "AMD64 ARM64"
+          - os: macos-11
+            cibw_archs: "x86_64 arm64"
+          - os: "ubuntu-20.04"
+            cibw_archs: "aarch64"
+          - os: "ubuntu-20.04"
+            cibw_archs: "x86_64"
 
     steps:
       - uses: actions/checkout@v4
       - run: |
           git fetch --prune --unshallow
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
         with:
-          python-version: "${{ matrix.python-version }}"
+          platforms: all
 
-      - name: Install dependencies
-        run: |
-          python -m pip install -U -q pip pytest wheel setuptools twine numpy
-
-      - name: Build and install macOS/Windows wheel
-        if: matrix.os != 'ubuntu-latest'
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.0
         env:
-          USE_OMP: 0
-        run: |
-          python setup.py -v -q bdist_wheel
-          pip install --find-links=./dist/ pykdtree
-
-      - name: Test
-        if: matrix.os != 'ubuntu-latest'
-        run: |
-          pytest -v --pyargs pykdtree
-
-      - name: Build Linux wheels inside docker
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          docker run \
-            -e PLAT=${{ matrix.docker-image }} \
-            -e USE_OMP=1 \
-            -v `pwd`:/io \
-            quay.io/pypa/${{ matrix.docker-image }} \
-            /io/scripts/build-manylinux-wheels.sh
+          CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *i686 *-musllinux_aarch64"
+          CIBW_ARCHS: "${{ matrix.cibw_archs }}"
+          CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
+          CIBW_TEST_REQUIRES: "pytest"
+          CIBW_TEST_SKIP: "*_arm64 *_universal2:arm64"
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist/*.whl
+          path: ./wheelhouse/*.whl
 
   upload_pypi:
     needs: [build_sdist, build_wheels]

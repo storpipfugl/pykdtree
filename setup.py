@@ -18,6 +18,9 @@
 import os
 import sys
 import re
+
+import numpy as np
+from Cython.Build import cythonize
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
@@ -45,14 +48,9 @@ OMP_LINK_ARGS = {
     'msvc': []
 }
 
-def set_builtin(name, value):
-    if isinstance(__builtins__, dict):
-        __builtins__[name] = value
-    else:
-        setattr(__builtins__, name, value)
-
 
 class build_ext_subclass(build_ext):
+    """Custom extension building to have platform and compiler specific flags."""
 
     def build_extensions(self):
         comp = self.compiler.compiler_type
@@ -70,18 +68,6 @@ class build_ext_subclass(build_ext):
         self.extensions[0].extra_compile_args = extra_compile_args
         self.extensions[0].extra_link_args = extra_link_args
         build_ext.build_extensions(self)
-
-    def finalize_options(self):
-        '''
-        In order to avoid premature import of numpy before it gets installed as a dependency
-        get numpy include directories during the extensions building process
-        http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py
-        '''
-        build_ext.finalize_options(self)
-        # Prevent numpy from thinking it is still in its setup process:
-        set_builtin('__NUMPY_SETUP__', False)
-        import numpy
-        self.include_dirs.append(numpy.get_include())
 
 
 def _omp_compile_link_args(compiler):
@@ -199,22 +185,26 @@ def _compile_link_paths_from_manifest(cmd):
 with open('README.rst', 'r') as readme_file:
     readme = readme_file.read()
 
+extensions = [
+    Extension('pykdtree.kdtree', sources=['pykdtree/kdtree.pyx', 'pykdtree/_kdtree_core.c'],
+              include_dirs=[np.get_include()],
+              ),
+]
+
 setup(
     name='pykdtree',
-    version='1.3.7.post0',
+    version='1.3.9',
     url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     long_description=readme,
     author='Esben S. Nielsen',
     author_email='storpipfugl@gmail.com',
     packages=['pykdtree'],
-    python_requires='>=3.7',
+    python_requires='>=3.9',
     install_requires=['numpy'],
-    setup_requires=['numpy'],
     tests_require=['pytest'],
     zip_safe=False,
-    ext_modules=[Extension('pykdtree.kdtree',
-                           ['pykdtree/kdtree.c', 'pykdtree/_kdtree_core.c'])],
+    ext_modules=cythonize(extensions),
     cmdclass={'build_ext': build_ext_subclass},
     classifiers=[
       'Development Status :: 5 - Production/Stable',
