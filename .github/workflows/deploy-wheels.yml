@@ -27,27 +27,18 @@ jobs:
           path: dist/*.tar.gz
 
   build_wheels:
-    name: "Build wheels on ${{ matrix.os }}"
+    name: "Build wheels on ${{ matrix.os }} ${{ matrix.cibw_archs_linux }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [windows-2019, macos-11]
-        cibw_build: [""]
         cibw_archs_linux: [""]
         include:
           - os: "ubuntu-20.04"
             cibw_archs_linux: "aarch64"
-            cibw_build: "cp39-* cp10-*"
           - os: "ubuntu-20.04"
-            cibw_archs_linux: "auto"
-            cibw_build: "cp39-* cp10-*"
-          - os: "ubuntu-20.04"
-            cibw_archs_linux: "aarch64"
-            cibw_build: "cp311-* cp12-*"
-          - os: "ubuntu-20.04"
-            cibw_archs_linux: "auto"
-            cibw_build: "cp311-* cp112-*"
+            cibw_archs_linux: "x86_64"
 
     steps:
       - uses: actions/checkout@v4
@@ -60,10 +51,9 @@ jobs:
         with:
           platforms: all
 
-      - name: Build wheels ${{ matrix.cibw_archs_linux }} ${{ matrix.cibw_build }}
+      - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.0
         env:
-          CIBW_BUILD: "${{ matrix.cibw_build }}"
           CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *i686 *-musllinux_aarch64"
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ARCHS_WINDOWS: "AMD64 ARM64"
