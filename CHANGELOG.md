@@ -1,3 +1,15 @@
+## Version 1.3.9 (2023/09/22)
+
+
+### Pull Requests Merged
+
+#### Features added
+
+* [PR 98](https://github.com/storpipfugl/pykdtree/pull/98) - Switch to cibuildwheel for wheel building
+
+In this release 1 pull request was closed.
+
+
 ## Version 1.3.8 (2023/09/21)
 
 
