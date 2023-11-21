@@ -188,6 +188,7 @@ with open('README.rst', 'r') as readme_file:
 extensions = [
     Extension('pykdtree.kdtree', sources=['pykdtree/kdtree.pyx', 'pykdtree/_kdtree_core.c'],
               include_dirs=[np.get_include()],
+              define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
               ),
 ]
 
