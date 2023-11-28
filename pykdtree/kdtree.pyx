@@ -20,6 +20,7 @@ cimport numpy as np
 from libc.stdint cimport uint32_t, int8_t, uint8_t
 cimport cython
 
+np.import_array()
 
 # Node structure
 cdef struct node_float:
