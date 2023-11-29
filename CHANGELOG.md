@@ -1,5 +1,15 @@
-## Version 1.3.9 (2023/09/22)
+## Version 1.3.10 (2023/11/29)
 
+### Pull Requests Merged
+
+#### Bugs fixed
+
+* [PR 102](https://github.com/storpipfugl/pykdtree/pull/102) - Switch to Cython 3 in build process
+
+In this release 1 pull request was closed.
+
+
+## Version 1.3.9 (2023/09/22)
 
 ### Pull Requests Merged
 

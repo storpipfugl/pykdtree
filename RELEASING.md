@@ -2,7 +2,22 @@
 
 1. Add release information to README.rst
 2. Update version number in setup.py
-3. Commit changes
+3. run `loghub` and update the `CHANGELOG.md` file and commit the changes:
+
+   ```
+   loghub storpipfugl/pykdtree --token $LOGHUB_GITHUB_TOKEN  -st $(git tag --sort=-version:refname --list 'v*' | head -n 1) -plg bug "Bugs fixed" -plg enhancement "Features added" -plg documentation "Documentation changes"
+   ```
+
+   This uses a `LOGHUB_GITHUB_TOKEN` environment variable. This must be created
+   on GitHub and it is recommended that you add it to your `.bashrc` or
+   `.bash_profile` or equivalent.
+
+   This command will create a CHANGELOG.temp file which need to be added
+   to the top of the CHANGLOG.md file.  The same content is also printed
+   to terminal, so that can be copy-pasted, too.  Remember to update also
+   the version number to the same given in step 5. Don't forget to commit
+   CHANGELOG.md!
+
 4. Create a git annotated tag by running:
 
    ```
