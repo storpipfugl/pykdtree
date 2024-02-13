@@ -20,8 +20,9 @@ import sys
 import re
 
 import numpy as np
-from Cython.Build import cythonize
-from setuptools import setup, Extension
+from Cython.Build import build_ext
+from Cython.Distutils import Extension
+from setuptools import setup
 from setuptools.command.build_ext import build_ext
 
 
@@ -189,9 +190,10 @@ extensions = [
     Extension('pykdtree.kdtree', sources=['pykdtree/kdtree.pyx', 'pykdtree/_kdtree_core.c'],
               include_dirs=[np.get_include()],
               define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
-              compiler_directions={"language_level": "3"},
+              cython_directives={"language_level": "3"},
               ),
 ]
+
 
 setup(
     name='pykdtree',
@@ -206,7 +208,7 @@ setup(
     install_requires=['numpy'],
     tests_require=['pytest'],
     zip_safe=False,
-    ext_modules=cythonize(extensions),
+    ext_modules=extensions,
     cmdclass={'build_ext': build_ext_subclass},
     classifiers=[
       'Development Status :: 5 - Production/Stable',
