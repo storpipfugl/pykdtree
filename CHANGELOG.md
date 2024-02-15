@@ -1,3 +1,21 @@
+## Version 1.3.11 (2024/02/15)
+
+### Issues Closed
+
+* [Issue 106](https://github.com/storpipfugl/pykdtree/issues/106) - Gotchas when installing on MacOS ([PR 107](https://github.com/storpipfugl/pykdtree/pull/107) by [@djhoese](https://github.com/djhoese))
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+#### Features added
+
+* [PR 109](https://github.com/storpipfugl/pykdtree/pull/109) - Build wheels with numpy 2
+* [PR 107](https://github.com/storpipfugl/pykdtree/pull/107) - Add OpenMP warning when extension fails to import ([106](https://github.com/storpipfugl/pykdtree/issues/106))
+
+In this release 2 pull requests were closed.
+
+
 ## Version 1.3.10 (2023/11/29)
 
 ### Pull Requests Merged
