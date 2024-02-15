@@ -201,6 +201,7 @@ setup(
     url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     long_description=readme,
+    long_description_content_type="text/x-rst",
     author='Esben S. Nielsen',
     author_email='storpipfugl@gmail.com',
     packages=['pykdtree'],
