@@ -1,3 +1,14 @@
+## Version 1.3.12 (2024/04/12)
+
+### Pull Requests Merged
+
+#### Features added
+
+* [PR 113](https://github.com/storpipfugl/pykdtree/pull/113) - Build against numpy 2.0rc1
+
+In this release 1 pull request was closed.
+
+
 ## Version 1.3.11 (2024/02/15)
 
 ### Issues Closed
