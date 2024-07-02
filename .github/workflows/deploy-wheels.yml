@@ -66,8 +66,8 @@ jobs:
           CIBW_TEST_REQUIRES: "pytest"
           CIBW_TEST_SKIP: "*_arm64 *_universal2:arm64"
           # we use openmp (libomp) from homebrew which has a current limit of
-          # macos 10.12 (Monterey): https://formulae.brew.sh/formula/libomp
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.12
+          # macos 12 (Monterey): https://formulae.brew.sh/formula/libomp
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=12
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v4
