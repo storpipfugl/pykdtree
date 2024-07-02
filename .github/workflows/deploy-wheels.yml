@@ -36,7 +36,7 @@ jobs:
           - os: windows-2019
             cibw_archs: "AMD64 ARM64"
             artifact_name: "win"
-          - os: macos-11
+          - os: macos-12
             cibw_archs: "x86_64 arm64"
             artifact_name: "mac"
           - os: "ubuntu-20.04"
@@ -58,13 +58,16 @@ jobs:
           platforms: all
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.18.1
+        uses: pypa/cibuildwheel@v2.19.1
         env:
           CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *i686 *-musllinux_aarch64"
           CIBW_ARCHS: "${{ matrix.cibw_archs }}"
           CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
           CIBW_TEST_REQUIRES: "pytest"
           CIBW_TEST_SKIP: "*_arm64 *_universal2:arm64"
+          # we use openmp (libomp) from homebrew which has a current limit of
+          # macos 12 (Monterey): https://formulae.brew.sh/formula/libomp
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=12
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v4
