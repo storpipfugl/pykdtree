@@ -2,7 +2,6 @@ import numpy as np
 
 from pykdtree.kdtree import KDTree
 
-
 data_pts_real = np.array([[  790535.062,  -369324.656,  6310963.5  ],
        [  790024.312,  -365155.688,  6311270.   ],
        [  789515.75 ,  -361009.469,  6311572.   ],
@@ -370,3 +369,11 @@ def test127d_ok():
     kdtree = KDTree(data_pts)
     dist, idx = kdtree.query(data_pts)
     assert np.all(dist == 0)
+
+
+def test_empty_fail():
+    data_pts = np.array([])
+    try:
+        kdtree = KDTree(data_pts)
+    except ValueError as e:
+        assert 'non-empty' in str(e), str(e)
