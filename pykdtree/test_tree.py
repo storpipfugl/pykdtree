@@ -372,7 +372,12 @@ def test127d_ok():
 
 
 def test_empty_fail():
-    data_pts = np.array([])
+    data_pts = np.array([1, 2, 3])
+    try:
+        kdtree = KDTree(data_pts)
+    except ValueError as e:
+        assert 'exactly 2 dimensions' in str(e), str(e)
+    data_pts = np.array([[]])
     try:
         kdtree = KDTree(data_pts)
     except ValueError as e:
