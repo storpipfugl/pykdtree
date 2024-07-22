@@ -94,6 +94,10 @@ cdef class KDTree:
         # Check arguments
         if leafsize < 1:
             raise ValueError('leafsize must be greater than zero')
+        if data_pts.ndim != 2:
+            raise ValueError('data_pts array should have exactly 2 dimensions')
+        if data_pts.size == 0:
+            raise ValueError('data_pts should be non-empty')
 
         # Get data content
         cdef np.ndarray[float, ndim=1] data_array_float

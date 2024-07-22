@@ -2,7 +2,6 @@ import numpy as np
 
 from pykdtree.kdtree import KDTree
 
-
 data_pts_real = np.array([[  790535.062,  -369324.656,  6310963.5  ],
        [  790024.312,  -365155.688,  6311270.   ],
        [  789515.75 ,  -361009.469,  6311572.   ],
@@ -106,9 +105,9 @@ data_pts_real = np.array([[  790535.062,  -369324.656,  6310963.5  ],
 
 def test1d():
 
-    data_pts = np.arange(1000)
+    data_pts = np.arange(1000)[..., None]
     kdtree = KDTree(data_pts, leafsize=15)
-    query_pts = np.arange(400, 300, -10)
+    query_pts = np.arange(400, 300, -10)[..., None]
     dist, idx = kdtree.query(query_pts)
     assert idx[0] == 400
     assert dist[0] == 0
@@ -301,16 +300,17 @@ def test_scipy_comp():
 
 
 def test1d_mask():
-    data_pts = np.arange(1000)
+    data_pts = np.arange(1000)[..., None]
     # put the input locations in random order
     np.random.shuffle(data_pts)
-    bad_idx = np.nonzero(data_pts == 400)
-    nearest_idx_1 = np.nonzero(data_pts == 399)
-    nearest_idx_2 = np.nonzero(data_pts == 390)
+    bad_idx = np.nonzero(data_pts[..., 0] == 400)
+    print(bad_idx)
+    nearest_idx_1 = np.nonzero(data_pts[..., 0] == 399)
+    nearest_idx_2 = np.nonzero(data_pts[..., 0] == 390)
     kdtree = KDTree(data_pts, leafsize=15)
     # shift the query points just a little bit for known neighbors
     # we want 399 as a result, not 401, when we query for ~400
-    query_pts = np.arange(399.9, 299.9, -10)
+    query_pts = np.arange(399.9, 299.9, -10)[..., None]
     query_mask = np.zeros(data_pts.shape[0]).astype(bool)
     query_mask[bad_idx] = True
     dist, idx = kdtree.query(query_pts, mask=query_mask)
@@ -321,10 +321,10 @@ def test1d_mask():
 
 
 def test1d_all_masked():
-    data_pts = np.arange(1000)
+    data_pts = np.arange(1000)[..., None]
     np.random.shuffle(data_pts)
     kdtree = KDTree(data_pts, leafsize=15)
-    query_pts = np.arange(400, 300, -10)
+    query_pts = np.arange(400, 300, -10)[..., None]
     query_mask = np.ones(data_pts.shape[0]).astype(bool)
     dist, idx = kdtree.query(query_pts, mask=query_mask)
     # all invalid
@@ -370,3 +370,16 @@ def test127d_ok():
     kdtree = KDTree(data_pts)
     dist, idx = kdtree.query(data_pts)
     assert np.all(dist == 0)
+
+
+def test_empty_fail():
+    data_pts = np.array([1, 2, 3])
+    try:
+        kdtree = KDTree(data_pts)
+    except ValueError as e:
+        assert 'exactly 2 dimensions' in str(e), str(e)
+    data_pts = np.array([[]])
+    try:
+        kdtree = KDTree(data_pts)
+    except ValueError as e:
+        assert 'non-empty' in str(e), str(e)
