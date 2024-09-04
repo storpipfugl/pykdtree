@@ -57,7 +57,7 @@ class build_ext_subclass(build_ext):
         comp = self.compiler.compiler_type
         omp_comp, omp_link = _omp_compile_link_args(comp)
         if comp in ('unix', 'cygwin', 'mingw32'):
-            extra_compile_args = ['-std=c99', '-O3'] + omp_comp
+            extra_compile_args = ['-std=c17', '-O3'] + omp_comp
             extra_link_args = omp_link
         elif comp == 'msvc':
             extra_compile_args = ['/Ox'] + omp_comp
