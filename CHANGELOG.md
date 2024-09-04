@@ -1,3 +1,25 @@
+## Version 1.3.13 (2024/09/04)
+
+### Issues Closed
+
+* [Issue 116](https://github.com/storpipfugl/pykdtree/issues/116) - Segmentation fault on empty points ([PR 119](https://github.com/storpipfugl/pykdtree/pull/119) by [@STNLd2](https://github.com/STNLd2))
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+#### Bugs fixed
+
+* [PR 119](https://github.com/storpipfugl/pykdtree/pull/119) - Fixed empty pts segfault ([116](https://github.com/storpipfugl/pykdtree/issues/116))
+
+#### Features added
+
+* [PR 124](https://github.com/storpipfugl/pykdtree/pull/124) - Enable Python 3.13 wheel building and switch to C17 C standard
+
+In this release 2 pull requests were closed.
+
+
+
 ## Version 1.3.12 (2024/04/12)
 
 ### Pull Requests Merged
