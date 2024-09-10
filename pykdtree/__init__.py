@@ -9,5 +9,5 @@ except ImportError as err:
         "could not find it on your system. To enable better performance "
         "OpenMP must be installed (ex. ``brew install omp`` on Mac with "
         "HomeBrew). Otherwise, try installing Pykdtree from source (ex. "
-        "``pip install --no-binary pykdtree --force-install pykdtree``)."
+        "``pip install --no-binary pykdtree --force-reinstall pykdtree``)."
     ) from err
