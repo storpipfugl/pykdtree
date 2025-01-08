@@ -36,7 +36,7 @@ jobs:
           - os: windows-2019
             cibw_archs: "AMD64 ARM64"
             artifact_name: "win"
-          - os: macos-12
+          - os: macos-13
             cibw_archs: "x86_64 arm64"
             artifact_name: "mac"
           - os: "ubuntu-20.04"
@@ -66,8 +66,8 @@ jobs:
           CIBW_TEST_REQUIRES: "pytest"
           CIBW_TEST_SKIP: "*_arm64 *_universal2:arm64"
           # we use openmp (libomp) from homebrew which has a current limit of
-          # macos 12 (Monterey): https://formulae.brew.sh/formula/libomp
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=12
+          # macos 13 (Ventura): https://formulae.brew.sh/formula/libomp
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=13
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v4
@@ -106,7 +106,7 @@ jobs:
           path: dist
       - name: Publish package to PyPI
         if: github.event.action == 'published'
-        uses: pypa/gh-action-pypi-publish@v1.12.2
+        uses: pypa/gh-action-pypi-publish@v1.12.3
         with:
           user: ${{ secrets.pypi_username }}
           password: ${{ secrets.pypi_password }}
