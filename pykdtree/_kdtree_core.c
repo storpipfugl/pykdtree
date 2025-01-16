@@ -29,7 +29,7 @@ Anne M. Archibald and libANN by David M. Mount and Sunil Arya.
 #include <float.h>
 
 #define PA(i,d)			(pa[no_dims * pidx[i] + d])
-#define PASWAP(a,b) { uint32_t tmp = pidx[a]; pidx[a] = pidx[b]; pidx[b] = tmp; }
+#define PASWAP(a,b) { uint64_t tmp = pidx[a]; pidx[a] = pidx[b]; pidx[b] = tmp; }
 
 #ifdef _MSC_VER
 #define restrict __restrict
@@ -40,8 +40,8 @@ typedef struct
 {
     float cut_val;
     int8_t cut_dim;
-    uint32_t start_idx;
-    uint32_t n;
+    uint64_t start_idx;
+    uint64_t n;
     float cut_bounds_lv;
     float cut_bounds_hv;
     struct Node_float *left_child;
@@ -52,7 +52,7 @@ typedef struct
 {
     float *bbox;
     int8_t no_dims;
-    uint32_t *pidx;
+    uint64_t *pidx;
     struct Node_float *root;
 } Tree_float;
 
@@ -61,8 +61,8 @@ typedef struct
 {
     double cut_val;
     int8_t cut_dim;
-    uint32_t start_idx;
-    uint32_t n;
+    uint64_t start_idx;
+    uint64_t n;
     double cut_bounds_lv;
     double cut_bounds_hv;
     struct Node_double *left_child;
@@ -73,58 +73,58 @@ typedef struct
 {
     double *bbox;
     int8_t no_dims;
-    uint32_t *pidx;
+    uint64_t *pidx;
     struct Node_double *root;
 } Tree_double;
 
 
 
-void insert_point_float(uint32_t *closest_idx, float *closest_dist, uint32_t pidx, float cur_dist, uint32_t k);
-void get_bounding_box_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, float *bbox);
-int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *bbox, int8_t *cut_dim,
-              float *cut_val, uint32_t *n_lo);
-Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t bsp);
-Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, float *bbox);
-Node_float * create_node_float(uint32_t start_idx, uint32_t n, int is_leaf);
+void insert_point_float(uint64_t *closest_idx, float *closest_dist, uint64_t pidx, float cur_dist, uint64_t k);
+void get_bounding_box_float(float *pa, uint64_t *pidx, int8_t no_dims, uint64_t n, float *bbox);
+int partition_float(float *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, float *bbox, int8_t *cut_dim,
+              float *cut_val, uint64_t *n_lo);
+Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint64_t n, uint64_t bsp);
+Node_float* construct_subtree_float(float *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, uint64_t bsp, float *bbox);
+Node_float * create_node_float(uint64_t start_idx, uint64_t n, int is_leaf);
 void delete_subtree_float(Node_float *root);
 void delete_tree_float(Tree_float *tree);
 void print_tree_float(Node_float *root, int level);
 float calc_dist_float(float *point1_coord, float *point2_coord, int8_t no_dims);
 float get_cube_offset_float(int8_t dim, float *point_coord, float *bbox);
 float get_min_dist_float(float *point_coord, int8_t no_dims, float *bbox);
-void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
-                 uint32_t k, uint32_t *restrict closest_idx, float *restrict closest_dist);
-void search_leaf_float_mask(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
-                 uint32_t k, uint8_t *restrict mask, uint32_t *restrict closest_idx, float *restrict closest_dist);
-void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord,
-                      float min_dist, uint32_t k, float distance_upper_bound, float eps_fac, uint8_t *mask, uint32_t *  closest_idx, float *closest_dist);
+void search_leaf_float(float *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, float *restrict point_coord,
+                 uint64_t k, uint64_t *restrict closest_idx, float *restrict closest_dist);
+void search_leaf_float_mask(float *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, float *restrict point_coord,
+                 uint64_t k, uint8_t *restrict mask, uint64_t *restrict closest_idx, float *restrict closest_dist);
+void search_splitnode_float(Node_float *root, float *pa, uint64_t *pidx, int8_t no_dims, float *point_coord,
+                      float min_dist, uint64_t k, float distance_upper_bound, float eps_fac, uint8_t *mask, uint64_t *  closest_idx, float *closest_dist);
 void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
-                 uint32_t num_points, uint32_t k,  float distance_upper_bound,
-                 float eps, uint8_t *mask, uint32_t *closest_idxs, float *closest_dists);
+                 uint64_t num_points, uint64_t k,  float distance_upper_bound,
+                 float eps, uint8_t *mask, uint64_t *closest_idxs, float *closest_dists);
 
 
-void insert_point_double(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k);
-void get_bounding_box_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, double *bbox);
-int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *bbox, int8_t *cut_dim,
-              double *cut_val, uint32_t *n_lo);
-Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp);
-Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, double *bbox);
-Node_double * create_node_double(uint32_t start_idx, uint32_t n, int is_leaf);
+void insert_point_double(uint64_t *closest_idx, double *closest_dist, uint64_t pidx, double cur_dist, uint64_t k);
+void get_bounding_box_double(double *pa, uint64_t *pidx, int8_t no_dims, uint64_t n, double *bbox);
+int partition_double(double *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, double *bbox, int8_t *cut_dim,
+              double *cut_val, uint64_t *n_lo);
+Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint64_t n, uint64_t bsp);
+Node_double* construct_subtree_double(double *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, uint64_t bsp, double *bbox);
+Node_double * create_node_double(uint64_t start_idx, uint64_t n, int is_leaf);
 void delete_subtree_double(Node_double *root);
 void delete_tree_double(Tree_double *tree);
 void print_tree_double(Node_double *root, int level);
 double calc_dist_double(double *point1_coord, double *point2_coord, int8_t no_dims);
 double get_cube_offset_double(int8_t dim, double *point_coord, double *bbox);
 double get_min_dist_double(double *point_coord, int8_t no_dims, double *bbox);
-void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
-                 uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist);
-void search_leaf_double_mask(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
-                 uint32_t k, uint8_t *restrict mask, uint32_t *restrict closest_idx, double *restrict closest_dist);
-void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord,
-                      double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint8_t *mask, uint32_t *  closest_idx, double *closest_dist);
+void search_leaf_double(double *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, double *restrict point_coord,
+                 uint64_t k, uint64_t *restrict closest_idx, double *restrict closest_dist);
+void search_leaf_double_mask(double *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, double *restrict point_coord,
+                 uint64_t k, uint8_t *restrict mask, uint64_t *restrict closest_idx, double *restrict closest_dist);
+void search_splitnode_double(Node_double *root, double *pa, uint64_t *pidx, int8_t no_dims, double *point_coord,
+                      double min_dist, uint64_t k, double distance_upper_bound, double eps_fac, uint8_t *mask, uint64_t *  closest_idx, double *closest_dist);
 void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
-                 uint32_t num_points, uint32_t k,  double distance_upper_bound,
-                 double eps, uint8_t *mask, uint32_t *closest_idxs, double *closest_dists);
+                 uint64_t num_points, uint64_t k,  double distance_upper_bound,
+                 double eps, uint8_t *mask, uint64_t *closest_idxs, double *closest_dists);
 
 
 
@@ -137,7 +137,7 @@ Params:
     cur_dist : distance to point inserted
     k : number of neighbours
 ************************************************/
-void insert_point_float(uint32_t *closest_idx, float *closest_dist, uint32_t pidx, float cur_dist, uint32_t k)
+void insert_point_float(uint64_t *closest_idx, float *closest_dist, uint64_t pidx, float cur_dist, uint64_t k)
 {
     int i;
     for (i = k - 1; i > 0; i--)
@@ -165,11 +165,11 @@ Params:
     n : number of points
     bbox : bounding box (return)
 ************************************************/
-void get_bounding_box_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, float *bbox)
+void get_bounding_box_float(float *pa, uint64_t *pidx, int8_t no_dims, uint64_t n, float *bbox)
 {
     float cur;
     int8_t i, j;
-    uint32_t bbox_idx, i2;
+    uint64_t bbox_idx, i2;
 
     /* Use first data point to initialize */
     for (i = 0; i < no_dims; i++)
@@ -210,12 +210,12 @@ Params:
     cut_val : value of cutting point (return)
     n_lo : number of point below cutting plane (return)
 ************************************************/
-int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *bbox, int8_t *cut_dim, float *cut_val, uint32_t *n_lo)
+int partition_float(float *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, float *bbox, int8_t *cut_dim, float *cut_val, uint64_t *n_lo)
 {
     int8_t dim = 0, i;
-    uint32_t p, q, i2;
+    uint64_t p, q, i2;
     float size = 0, min_val, max_val, split, side_len, cur_val;
-    uint32_t end_idx = start_idx + n - 1;
+    uint64_t end_idx = start_idx + n - 1;
 
     /* Find largest bounding box side */
     for (i = 0; i < no_dims; i++)
@@ -275,7 +275,7 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
            Minimum 1 point will be in lower box.
         */
 
-        uint32_t j = start_idx;
+        uint64_t j = start_idx;
         split = PA(j, dim);
         for (i2 = start_idx + 1; i2 <= end_idx; i2++)
         {
@@ -297,7 +297,7 @@ int partition_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_id
            Minimum 1 point will be in higher box.
         */
 
-        uint32_t j = end_idx;
+        uint64_t j = end_idx;
         split = PA(j, dim);
         for (i2 = start_idx; i2 < end_idx; i2++)
         {
@@ -331,14 +331,14 @@ Params:
     bsp : number of points per leaf
     bbox : bounding box of set of data points
 ************************************************/
-Node_float* construct_subtree_float(float *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, float *bbox)
+Node_float* construct_subtree_float(float *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, uint64_t bsp, float *bbox)
 {
     /* Create new node */
     int is_leaf = (n <= bsp);
     Node_float *root = create_node_float(start_idx, n, is_leaf);
     int rval;
     int8_t cut_dim;
-    uint32_t n_lo;
+    uint64_t n_lo;
     float cut_val, lv, hv;
     if (is_leaf)
     {
@@ -387,17 +387,17 @@ Params:
     n :  number of data points
     bsp : number of points per leaf
 ************************************************/
-Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t bsp)
+Tree_float* construct_tree_float(float *pa, int8_t no_dims, uint64_t n, uint64_t bsp)
 {
     Tree_float *tree = (Tree_float *)malloc(sizeof(Tree_float));
-    uint32_t i;
-    uint32_t *pidx;
+    uint64_t i;
+    uint64_t *pidx;
     float *bbox;
 
     tree->no_dims = no_dims;
 
     /* Initialize permutation array */
-    pidx = (uint32_t *)malloc(sizeof(uint32_t) * n);
+    pidx = (uint64_t *)malloc(sizeof(uint64_t) * n);
     for (i = 0; i < n; i++)
     {
         pidx[i] = i;
@@ -420,7 +420,7 @@ Params:
     start_idx : index of first data point to use
     n :  number of data points
 ************************************************/
-Node_float* create_node_float(uint32_t start_idx, uint32_t n, int is_leaf)
+Node_float* create_node_float(uint64_t start_idx, uint64_t n, int is_leaf)
 {
     Node_float *new_node;
     if (is_leaf)
@@ -566,11 +566,11 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_float(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
-                 uint32_t k, uint32_t *restrict closest_idx, float *restrict closest_dist)
+void search_leaf_float(float *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, float *restrict point_coord,
+                 uint64_t k, uint64_t *restrict closest_idx, float *restrict closest_dist)
 {
     float cur_dist;
-    uint32_t i;
+    uint64_t i;
     /* Loop through all points in leaf */
     for (i = 0; i < n; i++)
     {
@@ -598,11 +598,11 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_float_mask(float *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, float *restrict point_coord,
-                               uint32_t k, uint8_t *mask, uint32_t *restrict closest_idx, float *restrict closest_dist)
+void search_leaf_float_mask(float *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, float *restrict point_coord,
+                               uint64_t k, uint8_t *mask, uint64_t *restrict closest_idx, float *restrict closest_dist)
 {
     float cur_dist;
-    uint32_t i;
+    uint64_t i;
     /* Loop through all points in leaf */
     for (i = 0; i < n; i++)
     {
@@ -634,9 +634,9 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord, 
-                      float min_dist, uint32_t k, float distance_upper_bound, float eps_fac, uint8_t *mask,
-                      uint32_t *closest_idx, float *closest_dist)
+void search_splitnode_float(Node_float *root, float *pa, uint64_t *pidx, int8_t no_dims, float *point_coord, 
+                      float min_dist, uint64_t k, float distance_upper_bound, float eps_fac, uint8_t *mask,
+                      uint64_t *closest_idx, float *closest_dist)
 {
     int8_t dim;
     float dist_left, dist_right;
@@ -733,21 +733,21 @@ Params:
     closest_dist : distance to closest point (return)
 ************************************************/
 void search_tree_float(Tree_float *tree, float *pa, float *point_coords,
-                 uint32_t num_points, uint32_t k, float distance_upper_bound,
-                 float eps, uint8_t *mask, uint32_t *closest_idxs, float *closest_dists)
+                 uint64_t num_points, uint64_t k, float distance_upper_bound,
+                 float eps, uint8_t *mask, uint64_t *closest_idxs, float *closest_dists)
 {
     float min_dist;
     float eps_fac = 1 / ((1 + eps) * (1 + eps));
     int8_t no_dims = tree->no_dims;
     float *bbox = tree->bbox;
-    uint32_t *pidx = tree->pidx;
-    uint32_t j = 0;
+    uint64_t *pidx = tree->pidx;
+    uint64_t j = 0;
 #if defined(_MSC_VER) && defined(_OPENMP)
-    int32_t i = 0;
-    int32_t local_num_points = (int32_t) num_points;
+    int64_t i = 0;
+    int64_t local_num_points = (int64_t) num_points;
 #else
-    uint32_t i;
-    uint32_t local_num_points = num_points;
+    uint64_t i;
+    uint64_t local_num_points = num_points;
 #endif
     Node_float *root = (Node_float *)tree->root;
 
@@ -781,7 +781,7 @@ Params:
     cur_dist : distance to point inserted
     k : number of neighbours
 ************************************************/
-void insert_point_double(uint32_t *closest_idx, double *closest_dist, uint32_t pidx, double cur_dist, uint32_t k)
+void insert_point_double(uint64_t *closest_idx, double *closest_dist, uint64_t pidx, double cur_dist, uint64_t k)
 {
     int i;
     for (i = k - 1; i > 0; i--)
@@ -809,11 +809,11 @@ Params:
     n : number of points
     bbox : bounding box (return)
 ************************************************/
-void get_bounding_box_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t n, double *bbox)
+void get_bounding_box_double(double *pa, uint64_t *pidx, int8_t no_dims, uint64_t n, double *bbox)
 {
     double cur;
     int8_t i, j;
-    uint32_t bbox_idx, i2;
+    uint64_t bbox_idx, i2;
 
     /* Use first data point to initialize */
     for (i = 0; i < no_dims; i++)
@@ -854,12 +854,12 @@ Params:
     cut_val : value of cutting point (return)
     n_lo : number of point below cutting plane (return)
 ************************************************/
-int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *bbox, int8_t *cut_dim, double *cut_val, uint32_t *n_lo)
+int partition_double(double *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, double *bbox, int8_t *cut_dim, double *cut_val, uint64_t *n_lo)
 {
     int8_t dim = 0, i;
-    uint32_t p, q, i2;
+    uint64_t p, q, i2;
     double size = 0, min_val, max_val, split, side_len, cur_val;
-    uint32_t end_idx = start_idx + n - 1;
+    uint64_t end_idx = start_idx + n - 1;
 
     /* Find largest bounding box side */
     for (i = 0; i < no_dims; i++)
@@ -919,7 +919,7 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
            Minimum 1 point will be in lower box.
         */
 
-        uint32_t j = start_idx;
+        uint64_t j = start_idx;
         split = PA(j, dim);
         for (i2 = start_idx + 1; i2 <= end_idx; i2++)
         {
@@ -941,7 +941,7 @@ int partition_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_
            Minimum 1 point will be in higher box.
         */
 
-        uint32_t j = end_idx;
+        uint64_t j = end_idx;
         split = PA(j, dim);
         for (i2 = start_idx; i2 < end_idx; i2++)
         {
@@ -975,14 +975,14 @@ Params:
     bsp : number of points per leaf
     bbox : bounding box of set of data points
 ************************************************/
-Node_double* construct_subtree_double(double *pa, uint32_t *pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, uint32_t bsp, double *bbox)
+Node_double* construct_subtree_double(double *pa, uint64_t *pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, uint64_t bsp, double *bbox)
 {
     /* Create new node */
     int is_leaf = (n <= bsp);
     Node_double *root = create_node_double(start_idx, n, is_leaf);
     int rval;
     int8_t cut_dim;
-    uint32_t n_lo;
+    uint64_t n_lo;
     double cut_val, lv, hv;
     if (is_leaf)
     {
@@ -1031,17 +1031,17 @@ Params:
     n :  number of data points
     bsp : number of points per leaf
 ************************************************/
-Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp)
+Tree_double* construct_tree_double(double *pa, int8_t no_dims, uint64_t n, uint64_t bsp)
 {
     Tree_double *tree = (Tree_double *)malloc(sizeof(Tree_double));
-    uint32_t i;
-    uint32_t *pidx;
+    uint64_t i;
+    uint64_t *pidx;
     double *bbox;
 
     tree->no_dims = no_dims;
 
     /* Initialize permutation array */
-    pidx = (uint32_t *)malloc(sizeof(uint32_t) * n);
+    pidx = (uint64_t *)malloc(sizeof(uint64_t) * n);
     for (i = 0; i < n; i++)
     {
         pidx[i] = i;
@@ -1064,7 +1064,7 @@ Params:
     start_idx : index of first data point to use
     n :  number of data points
 ************************************************/
-Node_double* create_node_double(uint32_t start_idx, uint32_t n, int is_leaf)
+Node_double* create_node_double(uint64_t start_idx, uint64_t n, int is_leaf)
 {
     Node_double *new_node;
     if (is_leaf)
@@ -1210,11 +1210,11 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_double(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
-                 uint32_t k, uint32_t *restrict closest_idx, double *restrict closest_dist)
+void search_leaf_double(double *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, double *restrict point_coord,
+                 uint64_t k, uint64_t *restrict closest_idx, double *restrict closest_dist)
 {
     double cur_dist;
-    uint32_t i;
+    uint64_t i;
     /* Loop through all points in leaf */
     for (i = 0; i < n; i++)
     {
@@ -1242,11 +1242,11 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_leaf_double_mask(double *restrict pa, uint32_t *restrict pidx, int8_t no_dims, uint32_t start_idx, uint32_t n, double *restrict point_coord,
-                               uint32_t k, uint8_t *mask, uint32_t *restrict closest_idx, double *restrict closest_dist)
+void search_leaf_double_mask(double *restrict pa, uint64_t *restrict pidx, int8_t no_dims, uint64_t start_idx, uint64_t n, double *restrict point_coord,
+                               uint64_t k, uint8_t *mask, uint64_t *restrict closest_idx, double *restrict closest_dist)
 {
     double cur_dist;
-    uint32_t i;
+    uint64_t i;
     /* Loop through all points in leaf */
     for (i = 0; i < n; i++)
     {
@@ -1278,9 +1278,9 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
-                      double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint8_t *mask,
-                      uint32_t *closest_idx, double *closest_dist)
+void search_splitnode_double(Node_double *root, double *pa, uint64_t *pidx, int8_t no_dims, double *point_coord, 
+                      double min_dist, uint64_t k, double distance_upper_bound, double eps_fac, uint8_t *mask,
+                      uint64_t *closest_idx, double *closest_dist)
 {
     int8_t dim;
     double dist_left, dist_right;
@@ -1377,21 +1377,21 @@ Params:
     closest_dist : distance to closest point (return)
 ************************************************/
 void search_tree_double(Tree_double *tree, double *pa, double *point_coords,
-                 uint32_t num_points, uint32_t k, double distance_upper_bound,
-                 double eps, uint8_t *mask, uint32_t *closest_idxs, double *closest_dists)
+                 uint64_t num_points, uint64_t k, double distance_upper_bound,
+                 double eps, uint8_t *mask, uint64_t *closest_idxs, double *closest_dists)
 {
     double min_dist;
     double eps_fac = 1 / ((1 + eps) * (1 + eps));
     int8_t no_dims = tree->no_dims;
     double *bbox = tree->bbox;
-    uint32_t *pidx = tree->pidx;
-    uint32_t j = 0;
+    uint64_t *pidx = tree->pidx;
+    uint64_t j = 0;
 #if defined(_MSC_VER) && defined(_OPENMP)
-    int32_t i = 0;
-    int32_t local_num_points = (int32_t) num_points;
+    int64_t i = 0;
+    int64_t local_num_points = (int64_t) num_points;
 #else
-    uint32_t i;
-    uint32_t local_num_points = num_points;
+    uint64_t i;
+    uint64_t local_num_points = num_points;
 #endif
     Node_double *root = (Node_double *)tree->root;
 

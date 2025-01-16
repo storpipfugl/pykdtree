@@ -17,7 +17,7 @@
 
 import numpy as np
 cimport numpy as np
-from libc.stdint cimport uint32_t, int8_t, uint8_t
+from libc.stdint cimport uint64_t, int8_t, uint8_t
 cimport cython
 
 np.import_array()
@@ -26,8 +26,8 @@ np.import_array()
 cdef struct node_float:
     float cut_val
     int8_t cut_dim
-    uint32_t start_idx
-    uint32_t n
+    uint64_t start_idx
+    uint64_t n
     float cut_bounds_lv
     float cut_bounds_hv
     node_float *left_child
@@ -36,14 +36,14 @@ cdef struct node_float:
 cdef struct tree_float:
     float *bbox
     int8_t no_dims
-    uint32_t *pidx
+    uint64_t *pidx
     node_float *root
 
 cdef struct node_double:
     double cut_val
     int8_t cut_dim
-    uint32_t start_idx
-    uint32_t n
+    uint64_t start_idx
+    uint64_t n
     double cut_bounds_lv
     double cut_bounds_hv
     node_double *left_child
@@ -52,15 +52,15 @@ cdef struct node_double:
 cdef struct tree_double:
     double *bbox
     int8_t no_dims
-    uint32_t *pidx
+    uint64_t *pidx
     node_double *root
 
-cdef extern tree_float* construct_tree_float(float *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
-cdef extern void search_tree_float(tree_float *kdtree, float *pa, float *point_coords, uint32_t num_points, uint32_t k, float distance_upper_bound, float eps_fac, uint8_t *mask, uint32_t *closest_idxs, float *closest_dists) nogil
+cdef extern tree_float* construct_tree_float(float *pa, int8_t no_dims, uint64_t n, uint64_t bsp) nogil
+cdef extern void search_tree_float(tree_float *kdtree, float *pa, float *point_coords, uint64_t num_points, uint64_t k, float distance_upper_bound, float eps_fac, uint8_t *mask, uint64_t *closest_idxs, float *closest_dists) nogil
 cdef extern void delete_tree_float(tree_float *kdtree)
 
-cdef extern tree_double* construct_tree_double(double *pa, int8_t no_dims, uint32_t n, uint32_t bsp) nogil
-cdef extern void search_tree_double(tree_double *kdtree, double *pa, double *point_coords, uint32_t num_points, uint32_t k, double distance_upper_bound, double eps_fac, uint8_t *mask, uint32_t *closest_idxs, double *closest_dists) nogil
+cdef extern tree_double* construct_tree_double(double *pa, int8_t no_dims, uint64_t n, uint64_t bsp) nogil
+cdef extern void search_tree_double(tree_double *kdtree, double *pa, double *point_coords, uint64_t num_points, uint64_t k, double distance_upper_bound, double eps_fac, uint8_t *mask, uint64_t *closest_idxs, double *closest_dists) nogil
 cdef extern void delete_tree_double(tree_double *kdtree)
 
 cdef class KDTree:
@@ -81,9 +81,9 @@ cdef class KDTree:
     cdef readonly np.ndarray data
     cdef float *_data_pts_data_float
     cdef double *_data_pts_data_double
-    cdef readonly uint32_t n
+    cdef readonly uint64_t n
     cdef readonly int8_t ndim
-    cdef readonly uint32_t leafsize
+    cdef readonly uint64_t leafsize
 
     def __cinit__(KDTree self):
         self._kdtree_float = NULL
@@ -116,8 +116,8 @@ cdef class KDTree:
         self.data = self.data_pts
 
         # Get tree info
-        self.n = <uint32_t>data_pts.shape[0]
-        self.leafsize = <uint32_t>leafsize
+        self.n = <uint64_t>data_pts.shape[0]
+        self.leafsize = <uint64_t>leafsize
         if data_pts.ndim == 1:
             self.ndim = 1
         elif data_pts.shape[1] > 127:
@@ -185,15 +185,15 @@ cdef class KDTree:
             raise TypeError('Type mismatch. query points must be of type float32 when data points are of type float32')
 
         # Get query info
-        cdef uint32_t num_qpoints = query_pts.shape[0]
-        cdef uint32_t num_n = k
-        cdef np.ndarray[uint32_t, ndim=1] closest_idxs = np.empty(num_qpoints * k, dtype=np.uint32)
+        cdef uint64_t num_qpoints = query_pts.shape[0]
+        cdef uint64_t num_n = k
+        cdef np.ndarray[uint64_t, ndim=1] closest_idxs = np.empty(num_qpoints * k, dtype=np.uint64)
         cdef np.ndarray[float, ndim=1] closest_dists_float
         cdef np.ndarray[double, ndim=1] closest_dists_double
 
 
         # Set up return arrays
-        cdef uint32_t *closest_idxs_data = <uint32_t *>closest_idxs.data
+        cdef uint64_t *closest_idxs_data = <uint64_t *>closest_idxs.data
         cdef float *closest_dists_data_float
         cdef double *closest_dists_data_double
  
