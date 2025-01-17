@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from pykdtree.kdtree import KDTree
 
@@ -103,17 +104,20 @@ data_pts_real = np.array([[  790535.062,  -369324.656,  6310963.5  ],
        [  750056.375,   -46624.227,  6326519.   ],
        [  749718.875,   -43993.633,  6326578.   ]])
 
-def test1d():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test1d(index_bits):
 
     data_pts = np.arange(1000)[..., None]
-    kdtree = KDTree(data_pts, leafsize=15)
+    kdtree = KDTree(data_pts, leafsize=15, index_bits=index_bits)
     query_pts = np.arange(400, 300, -10)[..., None]
     dist, idx = kdtree.query(query_pts)
     assert idx[0] == 400
     assert dist[0] == 0
     assert idx[1] == 390
+    assert idx.dtype.itemsize * 8 == index_bits
 
-def test3d():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d(index_bits):
 
 
     #7, 93, 45
@@ -122,7 +126,7 @@ def test3d():
                           [769957.188, -202418.125, 6321069.5]])
 
 
-    kdtree = KDTree(data_pts_real)
+    kdtree = KDTree(data_pts_real, index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, sqr_dists=True)
 
     epsilon = 1e-5
@@ -132,8 +136,10 @@ def test3d():
     assert dist[0] == 0
     assert abs(dist[1] - 3.) < epsilon * dist[1]
     assert abs(dist[2] - 20001.) < epsilon * dist[2]
+    assert idx.dtype.itemsize * 8 == index_bits
 
-def test3d_float32():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_float32(index_bits):
 
 
     #7, 93, 45
@@ -142,7 +148,7 @@ def test3d_float32():
                           [769957.188, -202418.125, 6321069.5]], dtype=np.float32)
 
 
-    kdtree = KDTree(data_pts_real.astype(np.float32))
+    kdtree = KDTree(data_pts_real.astype(np.float32), index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, sqr_dists=True)
     epsilon = 1e-5
     assert idx[0] == 7
@@ -152,8 +158,10 @@ def test3d_float32():
     assert abs(dist[1] - 3.) < epsilon * dist[1]
     assert abs(dist[2] - 20001.) < epsilon * dist[2]
     assert kdtree.data_pts.dtype == np.float32
+    assert idx.dtype.itemsize * 8 == index_bits
 
-def test3d_float32_mismatch():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_float32_mismatch(index_bits):
 
 
     #7, 93, 45
@@ -161,10 +169,11 @@ def test3d_float32_mismatch():
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]], dtype=np.float32)
 
-    kdtree = KDTree(data_pts_real)
+    kdtree = KDTree(data_pts_real, index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, sqr_dists=True)
 
-def test3d_float32_mismatch2():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_float32_mismatch2(index_bits):
 
 
     #7, 93, 45
@@ -172,20 +181,20 @@ def test3d_float32_mismatch2():
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]])
 
-    kdtree = KDTree(data_pts_real.astype(np.float32))
+    kdtree = KDTree(data_pts_real.astype(np.float32), index_bits=index_bits)
     try:
         dist, idx = kdtree.query(query_pts, sqr_dists=True)
         assert False
     except TypeError:
         assert True
 
-
-def test3d_8n():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_8n(index_bits):
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]])
 
-    kdtree = KDTree(data_pts_real)
+    kdtree = KDTree(data_pts_real, index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, k=8)
 
     exp_dist = np.array([[  0.00000000e+00,   4.05250235e+03,   4.07389794e+03,   8.08201128e+03,
@@ -202,12 +211,13 @@ def test3d_8n():
     assert np.array_equal(idx, exp_idx)
     assert np.allclose(dist, exp_dist)
 
-def test3d_8n_ub():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_8n_ub(index_bits):
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]])
 
-    kdtree = KDTree(data_pts_real)
+    kdtree = KDTree(data_pts_real, index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, k=8, distance_upper_bound=10e3, sqr_dists=False)
 
     exp_dist = np.array([[  0.00000000e+00,   4.05250235e+03,   4.07389794e+03,   8.08201128e+03,
@@ -224,12 +234,13 @@ def test3d_8n_ub():
     assert np.array_equal(idx, exp_idx)
     assert np.allclose(dist, exp_dist)
 
-def test3d_8n_ub_leaf20():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_8n_ub_leaf20(index_bits):
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]])
 
-    kdtree = KDTree(data_pts_real, leafsize=20)
+    kdtree = KDTree(data_pts_real, leafsize=20, index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, k=8, distance_upper_bound=10e3, sqr_dists=False)
 
     exp_dist = np.array([[  0.00000000e+00,   4.05250235e+03,   4.07389794e+03,   8.08201128e+03,
@@ -246,12 +257,13 @@ def test3d_8n_ub_leaf20():
     assert np.array_equal(idx, exp_idx)
     assert np.allclose(dist, exp_dist)
 
-def test3d_8n_ub_eps():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_8n_ub_eps(index_bits):
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]])
 
-    kdtree = KDTree(data_pts_real)
+    kdtree = KDTree(data_pts_real, index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, k=8, eps=0.1, distance_upper_bound=10e3, sqr_dists=False)
 
     exp_dist = np.array([[  0.00000000e+00,   4.05250235e+03,   4.07389794e+03,   8.08201128e+03,
@@ -268,7 +280,8 @@ def test3d_8n_ub_eps():
     assert np.array_equal(idx, exp_idx)
     assert np.allclose(dist, exp_dist)
 
-def test3d_large_query():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_large_query(index_bits):
     # Target idxs: 7, 93, 45
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
@@ -278,7 +291,7 @@ def test3d_large_query():
     n = 20000
     query_pts = np.repeat(query_pts, n, axis=0)
 
-    kdtree = KDTree(data_pts_real)
+    kdtree = KDTree(data_pts_real, index_bits=index_bits)
     dist, idx = kdtree.query(query_pts, sqr_dists=True)
 
     epsilon = 1e-5
@@ -289,17 +302,19 @@ def test3d_large_query():
     assert np.all(abs(dist[n:2*n] - 3.) < epsilon * dist[n:2*n])
     assert np.all(abs(dist[2*n:] - 20001.) < epsilon * dist[2*n:])
 
-def test_scipy_comp():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test_scipy_comp(index_bits):
 
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
                           [769957.188, -202418.125, 6321069.5]])
 
-    kdtree = KDTree(data_pts_real)
+    kdtree = KDTree(data_pts_real, index_bits=index_bits)
     assert id(kdtree.data) == id(kdtree.data_pts)
 
 
-def test1d_mask():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test1d_mask(index_bits):
     data_pts = np.arange(1000)[..., None]
     # put the input locations in random order
     np.random.shuffle(data_pts)
@@ -307,7 +322,7 @@ def test1d_mask():
     print(bad_idx)
     nearest_idx_1 = np.nonzero(data_pts[..., 0] == 399)
     nearest_idx_2 = np.nonzero(data_pts[..., 0] == 390)
-    kdtree = KDTree(data_pts, leafsize=15)
+    kdtree = KDTree(data_pts, leafsize=15, index_bits=index_bits)
     # shift the query points just a little bit for known neighbors
     # we want 399 as a result, not 401, when we query for ~400
     query_pts = np.arange(399.9, 299.9, -10)[..., None]
@@ -320,10 +335,11 @@ def test1d_mask():
     assert np.isclose(dist[1], 0.1)
 
 
-def test1d_all_masked():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test1d_all_masked(index_bits):
     data_pts = np.arange(1000)[..., None]
     np.random.shuffle(data_pts)
-    kdtree = KDTree(data_pts, leafsize=15)
+    kdtree = KDTree(data_pts, leafsize=15, index_bits=index_bits)
     query_pts = np.arange(400, 300, -10)[..., None]
     query_mask = np.ones(data_pts.shape[0]).astype(bool)
     dist, idx = kdtree.query(query_pts, mask=query_mask)
@@ -332,7 +348,8 @@ def test1d_all_masked():
     assert np.all(d >= 1001 for d in dist)
 
 
-def test3d_mask():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test3d_mask(index_bits):
     #7, 93, 45
     query_pts = np.array([[  787014.438,  -340616.906,  6313018.],
                           [751763.125, -59925.969, 6326205.5],
@@ -352,30 +369,33 @@ def test3d_mask():
     assert abs(dist[1] - 3.) < epsilon * dist[1]
     assert abs(dist[2] - 20001.) < epsilon * dist[2]
 
-def test128d_fail():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test128d_fail(index_bits):
     pts = 100
     dims = 128
     data_pts = np.arange(pts * dims).reshape(pts, dims)
     try:
-        kdtree = KDTree(data_pts)
+        kdtree = KDTree(data_pts, index_bits=index_bits)
     except ValueError as exc:
         assert "Max 127 dimensions" in str(exc)
     else:
         raise Exception("Should not accept 129 dimensional data")
 
-def test127d_ok():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test127d_ok(index_bits):
     pts = 2
     dims = 127
     data_pts = np.arange(pts * dims).reshape(pts, dims)
-    kdtree = KDTree(data_pts)
+    kdtree = KDTree(data_pts, index_bits=index_bits)
     dist, idx = kdtree.query(data_pts)
     assert np.all(dist == 0)
 
 
-def test_empty_fail():
+@pytest.mark.parametrize("index_bits", [32, 64])
+def test_empty_fail(index_bits):
     data_pts = np.array([1, 2, 3])
     try:
-        kdtree = KDTree(data_pts)
+        kdtree = KDTree(data_pts, index_bits=index_bits)
     except ValueError as e:
         assert 'exactly 2 dimensions' in str(e), str(e)
     data_pts = np.array([[]])
@@ -383,3 +403,12 @@ def test_empty_fail():
         kdtree = KDTree(data_pts)
     except ValueError as e:
         assert 'non-empty' in str(e), str(e)
+
+
+def test_points_k_too_large_for_32bits_fail():
+    data_pts = np.zeros((2**16, 2), dtype=np.float32)
+    kdtree = KDTree(data_pts, index_bits=32)
+    try:
+        kdtree.query(data_pts, 2**16)
+    except ValueError as e:
+        assert 'greater than 2^32' in str(e), str(e)
