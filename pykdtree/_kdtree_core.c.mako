@@ -716,13 +716,14 @@ void search_tree_${DTYPE}_${ITYPE}(Tree_${DTYPE}_${ITYPE} *tree, ${DTYPE} *pa, $
     int8_t no_dims = tree->no_dims;
     ${DTYPE} *bbox = tree->bbox;
     u${ITYPE} *pidx = tree->pidx;
-    u${ITYPE} j = 0;
 #if defined(_MSC_VER) && defined(_OPENMP)
-    ${ITYPE} i = 0;
-    ${ITYPE} local_num_points = (${ITYPE}) num_points;
+    int64_t i = 0;
+    int64_t j = 0;
+    int64_t local_num_points = (int64_t) num_points;
 #else
-    u${ITYPE} i;
-    u${ITYPE} local_num_points = num_points;
+    uint64_t i;
+    uint64_t j;
+    uint64_t local_num_points = (uint64_t) num_points;
 #endif
     Node_${DTYPE}_${ITYPE} *root = (Node_${DTYPE}_${ITYPE} *)tree->root;
 

@@ -113,14 +113,13 @@ cdef class KDTree:
         Data points with shape (n , dims)
     leafsize : int, optional
         Maximum number of data points in tree leaf
-    index_bits : int, optional
-        Number of bits (32 or 64) to use for indexing. Default is 32, use 64 bits if n * k > 2^32.
     """
 
     cdef tree_float_int32_t *_kdtree_float_int32_t
     cdef tree_double_int32_t *_kdtree_double_int32_t
     cdef tree_float_int64_t *_kdtree_float_int64_t
     cdef tree_double_int64_t *_kdtree_double_int64_t
+    cdef readonly bint _use_int32_t
     cdef readonly np.ndarray data_pts
     cdef readonly np.ndarray data
     cdef float *_data_pts_data_float
@@ -128,7 +127,6 @@ cdef class KDTree:
     cdef readonly uint64_t n
     cdef readonly int8_t ndim
     cdef readonly uint32_t leafsize
-    cdef readonly uint32_t index_bits
 
     def __cinit__(KDTree self):
         self._kdtree_float_int32_t = NULL
@@ -136,7 +134,7 @@ cdef class KDTree:
         self._kdtree_float_int64_t = NULL
         self._kdtree_double_int64_t = NULL
 
-    def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=16, int index_bits=32):
+    def __init__(KDTree self, np.ndarray data_pts not None, int leafsize=16):
 
         # Check arguments
         if leafsize < 1:
@@ -145,8 +143,6 @@ cdef class KDTree:
             raise ValueError('data_pts array should have exactly 2 dimensions')
         if data_pts.size == 0:
             raise ValueError('data_pts should be non-empty')
-        if index_bits not in [32, 64]:
-            raise ValueError('index_bits must be either 32 or 64')
 
         # Get data content
         cdef np.ndarray[float, ndim=1] data_array_float
@@ -165,10 +161,8 @@ cdef class KDTree:
         self.data = self.data_pts
 
         # Get tree info
-        self.index_bits = index_bits
         self.n = <uint64_t>data_pts.shape[0]
-        if self.index_bits == 32 and self.n > UINT32_MAX:
-            raise ValueError('Set index_bits=64 for more than 2^32 data points')
+        self._use_int32_t = self.n < UINT32_MAX
         self.leafsize = <uint32_t>leafsize
         if data_pts.ndim == 1:
             self.ndim = 1
@@ -179,7 +173,7 @@ cdef class KDTree:
 
         # Release GIL and construct tree
         if data_pts.dtype == np.float32:
-            if self.index_bits == 32:
+            if self._use_int32_t:
                 with nogil:
                     self._kdtree_float_int32_t = construct_tree_float_int32_t(self._data_pts_data_float, self.ndim,
                                                               <uint32_t>self.n, self.leafsize)
@@ -188,7 +182,7 @@ cdef class KDTree:
                     self._kdtree_float_int64_t = construct_tree_float_int64_t(self._data_pts_data_float, self.ndim,
                                                               self.n, self.leafsize)
         else:
-            if self.index_bits == 32:
+            if self._use_int32_t:
                 with nogil:
                     self._kdtree_double_int32_t = construct_tree_double_int32_t(self._data_pts_data_double, self.ndim,
                                                                 <uint32_t>self.n, self.leafsize)
@@ -233,8 +227,6 @@ cdef class KDTree:
         elif distance_upper_bound is not None:
             if distance_upper_bound < 0:
                 raise ValueError('distance_upper_bound must be non negative')
-        elif self.index_bits == 32 and self.n * k > UINT32_MAX:
-            raise ValueError('Set index_bits=64 for num points * num neighbours greater than 2^32')
 
         # Check dimensions
         if query_pts.ndim == 1:
@@ -261,7 +253,7 @@ cdef class KDTree:
         cdef uint64_t *closest_idxs_data_int64_t
         cdef float *closest_dists_data_float
         cdef double *closest_dists_data_double
-        if self.index_bits == 32:
+        if self._use_int32_t:
             closest_idxs_int32_t = np.empty(num_qpoints * k, dtype=np.uint32)
             closest_idxs = closest_idxs_int32_t
             closest_idxs_data_int32_t = <uint32_t *>closest_idxs_int32_t.data
@@ -320,7 +312,7 @@ cdef class KDTree:
 
         # Release GIL and query tree
         if self.data_pts.dtype == np.float32:
-            if self.index_bits == 32:
+            if self._use_int32_t:
                 with nogil:
                     search_tree_float_int32_t(self._kdtree_float_int32_t, self._data_pts_data_float,
                                       query_array_data_float, <uint32_t>num_qpoints, <uint32_t>num_n, dub_float, epsilon_float,
@@ -331,7 +323,7 @@ cdef class KDTree:
                                       query_array_data_float, num_qpoints, num_n, dub_float, epsilon_float,
                                       query_mask_data, closest_idxs_data_int64_t, closest_dists_data_float)
         else:
-            if self.index_bits == 32:
+            if self._use_int32_t:
                 with nogil:
                     search_tree_double_int32_t(self._kdtree_double_int32_t, self._data_pts_data_double,
                                       query_array_data_double, <uint32_t>num_qpoints, <uint32_t>num_n, dub_double, epsilon_double,
