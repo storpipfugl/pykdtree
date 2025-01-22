@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from pykdtree.kdtree import KDTree
 
@@ -383,3 +384,34 @@ def test_empty_fail():
         kdtree = KDTree(data_pts)
     except ValueError as e:
         assert 'non-empty' in str(e), str(e)
+
+def test_tree_n_lt_maxint32_nk_gt_maxint32():
+    # n < UINT32_MAX but n * k > UINT32_MAX -> still uses 32-bit index
+    data_pts = np.random.random((2**20, 2)).astype(np.float32)
+    query_pts = np.random.random((3, 2)).astype(np.float32)
+    data_pts[0] = query_pts[0]
+    data_pts[1533] = query_pts[1]
+    data_pts[1048575] = query_pts[2]
+    kdtree = KDTree(data_pts)
+    dist, idx = kdtree.query(query_pts, k=2**14)
+    assert idx.shape == (3, 2**14)
+    assert idx.dtype == np.uint32
+    assert idx[0][0] == 0
+    assert idx[1][0] == 1533
+    assert idx[2][0] == 1048575
+
+@pytest.mark.skip(reason="Requires ~100G RAM, takes ~30mins to run")
+def test_tree_n_gt_maxint32():
+    # n > UINT32_MAX -> requires 64-bit index
+    data_pts = np.random.random((2**32 + 8, 2)).astype(np.float32)
+    query_pts = np.random.random((3, 2)).astype(np.float32)
+    data_pts[0] = query_pts[0]
+    data_pts[874516] = query_pts[1]
+    data_pts[4294967300] = query_pts[2]
+    kdtree = KDTree(data_pts)
+    dist, idx = kdtree.query(query_pts, k=12)
+    assert idx.shape == (3, 12)
+    assert idx.dtype == np.uint64
+    assert idx[0][0] == 0
+    assert idx[1][0] == 874516
+    assert idx[2][0] == 4294967300
