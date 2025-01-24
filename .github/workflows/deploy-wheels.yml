@@ -39,8 +39,10 @@ jobs:
             cibw_archs: "ARM64"
           - os: macos-13
             cibw_archs: "x86_64"
+            deploy_target: "13"
           - os: macos-14
             cibw_archs: "arm64"
+            deploy_target: "14"
           - os: ubuntu-24.04-arm
             cibw_archs: "aarch64"
           - os: ubuntu-22.04
@@ -62,8 +64,8 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           # we use openmp (libomp) from homebrew which has a current limit of
           # macos 13 (Ventura): https://formulae.brew.sh/formula/libomp
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=14
-          CIBW_BEFORE_BUILD_MACOS: "brew install libomp; echo $CIBW_ARCHS; if [[ $(sw_vers -productVersion) =~ ^13.* ]]; then export MACOSX_DEPLOYMENT_TARGET=13; fi"
+          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=${{ matrix.deploy_target }}"
+          CIBW_BEFORE_BUILD_MACOS: "brew install libomp"
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v4
