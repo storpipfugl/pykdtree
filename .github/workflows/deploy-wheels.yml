@@ -59,6 +59,7 @@ jobs:
           CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
           CIBW_TEST_REQUIRES: "pytest"
           CIBW_TEST_SKIP: "*-win_arm64"
+          CIBW_BUILD_VERBOSITY: 1
           # we use openmp (libomp) from homebrew which has a current limit of
           # macos 13 (Ventura): https://formulae.brew.sh/formula/libomp
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=13
