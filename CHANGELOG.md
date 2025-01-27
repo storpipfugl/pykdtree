@@ -1,3 +1,24 @@
+## Version 1.4.0 (2025/01/27)
+
+### Issues Closed
+
+* [Issue 38](https://github.com/storpipfugl/pykdtree/issues/38) - pydktree breaks down for very large number of data points ([PR 135](https://github.com/storpipfugl/pykdtree/pull/135) by [@lkeegan](https://github.com/lkeegan))
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+#### Bugs fixed
+
+* [PR 126](https://github.com/storpipfugl/pykdtree/pull/126) - Fix the wrong syntax of pip install
+
+#### Features added
+
+* [PR 135](https://github.com/storpipfugl/pykdtree/pull/135) - Add automatic switching between 32-bit and 64-bit structures depending on number of points ([38](https://github.com/storpipfugl/pykdtree/issues/38), [38](https://github.com/storpipfugl/pykdtree/issues/38))
+
+In this release 2 pull requests were closed.
+
+
 ## Version 1.3.13 (2024/09/04)
 
 ### Issues Closed
