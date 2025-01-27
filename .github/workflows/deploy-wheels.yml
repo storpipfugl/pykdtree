@@ -34,28 +34,24 @@ jobs:
       matrix:
         include:
           - os: windows-2019
-            cibw_archs: "AMD64 ARM64"
-            artifact_name: "win"
+            cibw_archs: "AMD64"
+          - os: windows-2019
+            cibw_archs: "ARM64"
           - os: macos-13
-            cibw_archs: "x86_64 arm64"
-            artifact_name: "mac"
-          - os: "ubuntu-20.04"
-            cibw_archs: "aarch64"
-            artifact_name: "ubuntu-aarch"
-          - os: "ubuntu-20.04"
             cibw_archs: "x86_64"
-            artifact_name: "ubuntu-x86_64"
+            deploy_target: "13"
+          - os: macos-14
+            cibw_archs: "arm64"
+            deploy_target: "14"
+          - os: ubuntu-24.04-arm
+            cibw_archs: "aarch64"
+          - os: ubuntu-22.04
+            cibw_archs: "x86_64"
 
     steps:
       - uses: actions/checkout@v4
       - run: |
           git fetch --prune --unshallow
-
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
@@ -64,15 +60,17 @@ jobs:
           CIBW_ARCHS: "${{ matrix.cibw_archs }}"
           CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
           CIBW_TEST_REQUIRES: "pytest"
-          CIBW_TEST_SKIP: "*_arm64 *_universal2:arm64"
+          CIBW_TEST_SKIP: "*-win_arm64"
+          CIBW_BUILD_VERBOSITY: 1
           # we use openmp (libomp) from homebrew which has a current limit of
           # macos 13 (Ventura): https://formulae.brew.sh/formula/libomp
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=13
+          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=${{ matrix.deploy_target }}"
+          CIBW_BEFORE_BUILD_MACOS: "brew install libomp"
 
       - name: Upload wheel(s) as build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.artifact_name }}
+          name: "wheels-${{ matrix.os }}-${{ matrix.cibw_archs }}"
           path: ./wheelhouse/*.whl
 
   upload_pypi:
@@ -84,25 +82,11 @@ jobs:
         with:
           name: sdist
           path: dist
-      - name: Download wheels artifact - win
+      - name: Download wheels artifacts
         uses: actions/download-artifact@v4
         with:
-          name: wheels-win
-          path: dist
-      - name: Download wheels artifact - mac
-        uses: actions/download-artifact@v4
-        with:
-          name: wheels-mac
-          path: dist
-      - name: Download wheels artifact - ubuntu aarch
-        uses: actions/download-artifact@v4
-        with:
-          name: wheels-ubuntu-aarch
-          path: dist
-      - name: Download wheels artifact - ubuntu x86_64
-        uses: actions/download-artifact@v4
-        with:
-          name: wheels-ubuntu-x86_64
+          pattern: wheels-*
+          merge-multiple: true
           path: dist
       - name: Publish package to PyPI
         if: github.event.action == 'published'
