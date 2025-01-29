@@ -836,14 +836,10 @@ void search_tree_float_int32_t(Tree_float_int32_t *tree, float *pa, float *point
     int8_t no_dims = tree->no_dims;
     float *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    uint32_t j = 0;
-#if defined(_MSC_VER) && defined(_OPENMP)
-    int32_t i = 0;
-    int32_t local_num_points = (int32_t) num_points;
-#else
-    uint32_t i;
-    uint32_t local_num_points = num_points;
-#endif
+    /* use 64-bit ints for indexing to avoid overflow, use signed ints to support all Openmp implementations */
+    int64_t i = 0;
+    int64_t j = 0;
+    int64_t local_num_points = (int64_t) num_points;
     Node_float_int32_t *root = (Node_float_int32_t *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -1412,14 +1408,10 @@ void search_tree_float_int64_t(Tree_float_int64_t *tree, float *pa, float *point
     int8_t no_dims = tree->no_dims;
     float *bbox = tree->bbox;
     uint64_t *pidx = tree->pidx;
-    uint64_t j = 0;
-#if defined(_MSC_VER) && defined(_OPENMP)
+    /* use 64-bit ints for indexing to avoid overflow, use signed ints to support all Openmp implementations */
     int64_t i = 0;
+    int64_t j = 0;
     int64_t local_num_points = (int64_t) num_points;
-#else
-    uint64_t i;
-    uint64_t local_num_points = num_points;
-#endif
     Node_float_int64_t *root = (Node_float_int64_t *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -2057,14 +2049,10 @@ void search_tree_double_int32_t(Tree_double_int32_t *tree, double *pa, double *p
     int8_t no_dims = tree->no_dims;
     double *bbox = tree->bbox;
     uint32_t *pidx = tree->pidx;
-    uint32_t j = 0;
-#if defined(_MSC_VER) && defined(_OPENMP)
-    int32_t i = 0;
-    int32_t local_num_points = (int32_t) num_points;
-#else
-    uint32_t i;
-    uint32_t local_num_points = num_points;
-#endif
+    /* use 64-bit ints for indexing to avoid overflow, use signed ints to support all Openmp implementations */
+    int64_t i = 0;
+    int64_t j = 0;
+    int64_t local_num_points = (int64_t) num_points;
     Node_double_int32_t *root = (Node_double_int32_t *)tree->root;
 
     /* Queries are OpenMP enabled */
@@ -2633,14 +2621,10 @@ void search_tree_double_int64_t(Tree_double_int64_t *tree, double *pa, double *p
     int8_t no_dims = tree->no_dims;
     double *bbox = tree->bbox;
     uint64_t *pidx = tree->pidx;
-    uint64_t j = 0;
-#if defined(_MSC_VER) && defined(_OPENMP)
+    /* use 64-bit ints for indexing to avoid overflow, use signed ints to support all Openmp implementations */
     int64_t i = 0;
+    int64_t j = 0;
     int64_t local_num_points = (int64_t) num_points;
-#else
-    uint64_t i;
-    uint64_t local_num_points = num_points;
-#endif
     Node_double_int64_t *root = (Node_double_int64_t *)tree->root;
 
     /* Queries are OpenMP enabled */
