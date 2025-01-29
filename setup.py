@@ -197,7 +197,7 @@ extensions = [
 
 setup(
     name='pykdtree',
-    version='1.4.0',
+    version='1.4.1',
     url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     long_description=readme,

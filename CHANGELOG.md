@@ -1,3 +1,21 @@
+## Version 1.4.1 (2025/01/29)
+
+### Issues Closed
+
+* [Issue 138](https://github.com/storpipfugl/pykdtree/issues/138) - Another integer overflow issue ([PR 139](https://github.com/storpipfugl/pykdtree/pull/139) by [@lkeegan](https://github.com/lkeegan))
+* [Issue 137](https://github.com/storpipfugl/pykdtree/issues/137) - Mako template needs to be re-rendered ([PR 139](https://github.com/storpipfugl/pykdtree/pull/139) by [@lkeegan](https://github.com/lkeegan))
+
+In this release 2 issues were closed.
+
+### Pull Requests Merged
+
+#### Bugs fixed
+
+* [PR 139](https://github.com/storpipfugl/pykdtree/pull/139) - Fix additional integer overflow issues ([138](https://github.com/storpipfugl/pykdtree/issues/138), [137](https://github.com/storpipfugl/pykdtree/issues/137))
+
+In this release 1 pull request was closed.
+
+
 ## Version 1.4.0 (2025/01/27)
 
 ### Issues Closed
