@@ -162,7 +162,7 @@ cdef class KDTree:
 
         # Get tree info
         self.n = <uint64_t>data_pts.shape[0]
-        self._use_int32_t = self.n * <uint64_t>data_pts.shape[1] < UINT32_MAX
+        self._use_int32_t = self.n * data_pts.shape[1] < UINT32_MAX
         self.leafsize = <uint32_t>leafsize
         if data_pts.ndim == 1:
             self.ndim = 1
