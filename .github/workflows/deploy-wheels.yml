@@ -58,6 +58,7 @@ jobs:
         env:
           CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *i686 *-musllinux_aarch64"
           CIBW_ARCHS: "${{ matrix.cibw_archs }}"
+          MYPY_TESTS_REQUIRED: "True"
           CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
           CIBW_TEST_REQUIRES: "pytest mypy"
           CIBW_TEST_SKIP: "*-win_arm64"

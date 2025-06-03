@@ -1,6 +1,17 @@
-from mypy import stubtest
+import os
 from contextlib import redirect_stdout
 from io import StringIO
+import pytest
+
+MYPY_TESTS_REQUIRED = os.environ.get("MYPY_TESTS_REQUIRED", None)
+
+
+def import_mypy():
+    if MYPY_TESTS_REQUIRED:
+        import mypy
+
+        return mypy
+    return pytest.importorskip("mypy", reason="mypy is not installed")
 
 
 def test_mypy():
@@ -11,6 +22,8 @@ def test_mypy():
         - Function / property signatures
         - Missing functions or properties in the stubs
     """
+    mypy = import_mypy()
+    stubtest = mypy.stubtest
 
     out = StringIO()
     with redirect_stdout(out):
