@@ -23,11 +23,10 @@ def test_mypy():
         - Missing functions or properties in the stubs
     """
     mypy = import_mypy()
-    stubtest = mypy.stubtest
 
     out = StringIO()
     with redirect_stdout(out):
-        code = stubtest.test_stubs(stubtest.parse_options(["pykdtree.kdtree"]))
+        code = mypy.stubtest.test_stubs(stubtest.parse_options(["pykdtree.kdtree"]))
 
     assert code == 0, "Mypy stub test failed:\n" + out.getvalue()
 
