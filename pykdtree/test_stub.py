@@ -1,20 +1,18 @@
 import os
-from contextlib import redirect_stdout
-from io import StringIO
 import pytest
 
 MYPY_TESTS_REQUIRED = os.environ.get("MYPY_TESTS_REQUIRED", None)
 
 
-def import_mypy():
+def import_stubtest():
     if MYPY_TESTS_REQUIRED:
-        import mypy
+        from mypy import stubtest
 
-        return mypy
-    return pytest.importorskip("mypy", reason="mypy is not installed")
+        return stubtest
+    return pytest.importorskip("mypy.stubtest", reason="mypy is not installed")
 
 
-def test_mypy():
+def test_mypy(capsys):
     """
     Run mypy stub tests for pykdtree.
     This function checks for:
@@ -22,13 +20,8 @@ def test_mypy():
         - Function / property signatures
         - Missing functions or properties in the stubs
     """
-    mypy = import_mypy()
+    stubtest = import_stubtest()
+    code = stubtest.test_stubs(stubtest.parse_options(["pykdtree.kdtree"]))
+    captured = capsys.readouterr()
 
-    out = StringIO()
-    with redirect_stdout(out):
-        code = mypy.stubtest.test_stubs(stubtest.parse_options(["pykdtree.kdtree"]))
-
-    assert code == 0, "Mypy stub test failed:\n" + out.getvalue()
-
-
-test_mypy()
+    assert code == 0, "Mypy stub test failed:\n" + captured.out
