@@ -31,24 +31,24 @@ class KDTree:
     """
 
     @property
-    def data_pts(self):
-        """Data points used to construct the kd-tree"""
+    def data_pts(self) -> np.ndarray:
+        """Data points used to construct the kd-tree."""
 
     @property
-    def data(self):
-        """Data points used to construct the kd-tree"""
+    def data(self) -> np.ndarray:
+        """Data points used to construct the kd-tree."""
 
     @property
-    def n(self):
-        """Number of data points"""
+    def n(self) -> int:
+        """Number of data points."""
 
     @property
-    def ndim(self):
-        """Number of dimensions"""
+    def ndim(self) -> int:
+        """Number of dimensions."""
 
     @property
-    def leafsize(self):
-        """Maximum number of data points in tree leaf"""
+    def leafsize(self) -> int:
+        """Maximum number of data points in tree leaf."""
 
     def __init__(self, data_pts: np.ndarray, leafsize: int = 16): ...
     def query(

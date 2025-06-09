@@ -2,96 +2,96 @@
 name: Build sdist and wheels
 
 on:
-    push:
-    pull_request:
-    release:
-        types:
-            - published
+  push:
+  pull_request:
+  release:
+    types:
+      - published
 jobs:
-    build_sdist:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout source
-              uses: actions/checkout@v4
+  build_sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-            - name: Create sdist
-              shell: bash -l {0}
-              run: |
-                  python -m pip install -q build
-                  python -m build -s
+      - name: Create sdist
+        shell: bash -l {0}
+        run: |
+          python -m pip install -q build
+          python -m build -s
 
-            - name: Upload sdist to build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: sdist
-                  path: dist/*.tar.gz
+      - name: Upload sdist to build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
 
-    build_wheels:
-        name: "Build wheels on ${{ matrix.os }} ${{ matrix.cibw_archs }}"
-        runs-on: ${{ matrix.os }}
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - os: windows-2019
-                      cibw_archs: "AMD64"
-                    - os: windows-2019
-                      cibw_archs: "ARM64"
-                    - os: macos-13
-                      cibw_archs: "x86_64"
-                      deploy_target: "13"
-                    - os: macos-14
-                      cibw_archs: "arm64"
-                      deploy_target: "14"
-                    - os: ubuntu-24.04-arm
-                      cibw_archs: "aarch64"
-                    - os: ubuntu-22.04
-                      cibw_archs: "x86_64"
+  build_wheels:
+    name: "Build wheels on ${{ matrix.os }} ${{ matrix.cibw_archs }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2019
+            cibw_archs: "AMD64"
+          - os: windows-2019
+            cibw_archs: "ARM64"
+          - os: macos-13
+            cibw_archs: "x86_64"
+            deploy_target: "13"
+          - os: macos-14
+            cibw_archs: "arm64"
+            deploy_target: "14"
+          - os: ubuntu-24.04-arm
+            cibw_archs: "aarch64"
+          - os: ubuntu-22.04
+            cibw_archs: "x86_64"
 
-        steps:
-            - uses: actions/checkout@v4
-            - run: |
-                  git fetch --prune --unshallow
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git fetch --prune --unshallow
 
-            - name: Build wheels
-              uses: pypa/cibuildwheel@v2.23.3
-              env:
-                  CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *i686 *-musllinux_aarch64"
-                  CIBW_ARCHS: "${{ matrix.cibw_archs }}"
-                  CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
-                  CIBW_TEST_REQUIRES: "pytest mypy"
-                  CIBW_TEST_SKIP: "*-win_arm64"
-                  CIBW_BUILD_VERBOSITY: 1
-                  # we use openmp (libomp) from homebrew which has a current limit of
-                  # macos 13 (Ventura): https://formulae.brew.sh/formula/libomp
-                  CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=${{ matrix.deploy_target }}"
-                  CIBW_BEFORE_BUILD_MACOS: "brew install libomp"
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.23.3
+        env:
+          CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *i686 *-musllinux_aarch64"
+          CIBW_ARCHS: "${{ matrix.cibw_archs }}"
+          CIBW_TEST_COMMAND: "pytest -v --pyargs pykdtree"
+          CIBW_TEST_REQUIRES: "pytest mypy"
+          CIBW_TEST_SKIP: "*-win_arm64"
+          CIBW_BUILD_VERBOSITY: 1
+          # we use openmp (libomp) from homebrew which has a current limit of
+          # macos 13 (Ventura): https://formulae.brew.sh/formula/libomp
+          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=${{ matrix.deploy_target }}"
+          CIBW_BEFORE_BUILD_MACOS: "brew install libomp"
 
-            - name: Upload wheel(s) as build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: "wheels-${{ matrix.os }}-${{ matrix.cibw_archs }}"
-                  path: ./wheelhouse/*.whl
+      - name: Upload wheel(s) as build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "wheels-${{ matrix.os }}-${{ matrix.cibw_archs }}"
+          path: ./wheelhouse/*.whl
 
-    upload_pypi:
-        needs: [build_sdist, build_wheels]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Download sdist artifact
-              uses: actions/download-artifact@v4
-              with:
-                  name: sdist
-                  path: dist
-            - name: Download wheels artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  pattern: wheels-*
-                  merge-multiple: true
-                  path: dist
-            - name: Publish package to PyPI
-              if: github.event.action == 'published'
-              uses: pypa/gh-action-pypi-publish@v1.12.4
-              with:
-                  user: ${{ secrets.pypi_username }}
-                  password: ${{ secrets.pypi_password }}
-                  skip-existing: true
+  upload_pypi:
+    needs: [build_sdist, build_wheels]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download sdist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+      - name: Download wheels artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - name: Publish package to PyPI
+        if: github.event.action == 'published'
+        uses: pypa/gh-action-pypi-publish@v1.12.4
+        with:
+          user: ${{ secrets.pypi_username }}
+          password: ${{ secrets.pypi_password }}
+          skip-existing: true
