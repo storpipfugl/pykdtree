@@ -207,7 +207,6 @@ setup(
     packages=['pykdtree'],
     python_requires='>=3.9',
     install_requires=['numpy'],
-    tests_require=['pytest', 'mypy'],
     extras_require={
         'test': ['pytest', 'mypy'],
     },
