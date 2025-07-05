@@ -1,3 +1,20 @@
+## Version 1.4.2 (2025/07/04)
+
+### Issues Closed
+
+* [Issue 141](https://github.com/storpipfugl/pykdtree/issues/141) - There will be problems with querying very large arrays
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+#### Features added
+
+* [PR 145](https://github.com/storpipfugl/pykdtree/pull/145) - Add kdtree.pyi stub files for type hints
+
+In this release 1 pull request was closed.
+
+
 ## Version 1.4.1 (2025/01/29)
 
 ### Issues Closed
