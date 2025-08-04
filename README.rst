@@ -132,6 +132,29 @@ improvements are expected to be minimal on a free-threaded interpreter.
 Any issues using ``pykdtree`` with free-threading should be filed as a GitHub
 issue.
 
+Multi-threading Gotchas
+-----------------------
+
+If using pykdtree from a multi-worker configuration, for example with the
+``dask`` library, take care to control the number of dask and OpenMP workers.
+On builds of pykdtree with OpenMP support (see "Control OpenMP usage" above),
+OpenMP will default to one worker thread per logical core on your system. Dask
+and libraries like it also tend to default to one worker thread per logical core.
+These libraries can conflict resulting in cases like a dask worker thread
+using pykdtree triggering OpenMP to create its workers. This has the potential of
+creating N * N worker threads which can slow down your system as it tries to
+manage and schedule that many threads.
+
+In situations like this it is recommended to limit OpenMP to 1 or 2 workers by
+defining the environment variable:
+
+.. code-block:: bash
+
+   OMP_NUM_THREADS=1
+
+This essentially shifts the parallelism responsibility to the high-level dask
+library rather than the low-level OpenMP library.
+
 Benchmarks
 ----------
 Comparison with scipy.spatial.cKDTree and libANN. This benchmark is on geospatial 3D data with 10053632 data points and 4276224 query points. The results are indexed relative to the construction time of scipy.spatial.cKDTree. A leafsize of 10 (scipy.spatial.cKDTree default) is used.
