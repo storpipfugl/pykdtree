@@ -220,7 +220,8 @@ setup(
       'Programming Language :: Python',
       'Operating System :: OS Independent',
       'Intended Audience :: Science/Research',
-      'Topic :: Scientific/Engineering'
+      'Topic :: Scientific/Engineering',
+      'Programming Language :: Python :: Free Threading :: 3 - Stable',
       ]
     )
 
