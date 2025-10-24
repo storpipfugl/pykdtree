@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing_extensions import disjoint_base
 from typing import Any
 import numpy as np
 
+@disjoint_base
 class KDTree:
     """kd-tree for fast nearest-neighbour lookup.
     The interface is made to resemble the scipy.spatial kd-tree except
