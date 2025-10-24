@@ -208,7 +208,7 @@ setup(
     python_requires='>=3.9',
     install_requires=['numpy'],
     extras_require={
-        'test': ['pytest', 'mypy'],
+        'test': ['pytest', 'mypy', "typing-extensions>=4.15"],
     },
     zip_safe=False,
     ext_modules=extensions,
