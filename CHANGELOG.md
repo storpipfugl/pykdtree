@@ -1,3 +1,37 @@
+## Version 1.4.3 (2025/08/06)
+
+### Issues Closed
+
+* [Issue 147](https://github.com/storpipfugl/pykdtree/issues/147) - No .pyi in the package
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+#### Features added
+
+* [PR 149](https://github.com/storpipfugl/pykdtree/pull/149) - Enable free-threading compatibility and bump numpy API to 1.25
+
+In this release 1 pull request was closed.
+
+
+## Version 1.4.2 (2025/07/04)
+
+### Issues Closed
+
+* [Issue 141](https://github.com/storpipfugl/pykdtree/issues/141) - There will be problems with querying very large arrays
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+#### Features added
+
+* [PR 145](https://github.com/storpipfugl/pykdtree/pull/145) - Add kdtree.pyi stub files for type hints
+
+In this release 1 pull request was closed.
+
+
 ## Version 1.4.1 (2025/01/29)
 
 ### Issues Closed

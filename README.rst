@@ -119,6 +119,42 @@ Increasing **leafsize** will reduce the memory overhead and construction time bu
 
 pykdtree accepts data in double precision (numpy.float64) or single precision (numpy.float32) floating point. If data of another type is used an internal copy in double precision is made resulting in a memory overhead. If the kd-tree is constructed on single precision data the query points must be single precision as well.
 
+Free-threading (no GIL) support
+-------------------------------
+
+Pykdtree is compiled with the necessary flags to be run from a free-threaded
+Python interpreter. That is, it can be called without the GIL. Once a
+``KDTree`` is constructed all state is stored internal to the object. Querying
+the ``KDTree`` object can be done from multiple threads simultaneously.
+``pykdtree`` has never acquired the GIL for low-level operations so performance
+improvements are expected to be minimal on a free-threaded interpreter.
+
+Any issues using ``pykdtree`` with free-threading should be filed as a GitHub
+issue.
+
+Multi-threading Gotchas
+-----------------------
+
+If using pykdtree from a multi-worker configuration, for example with the
+``dask`` library, take care to control the number of dask and OpenMP workers.
+On builds of pykdtree with OpenMP support (see "Control OpenMP usage" above),
+OpenMP will default to one worker thread per logical core on your system. Dask
+and libraries like it also tend to default to one worker thread per logical core.
+These libraries can conflict resulting in cases like a dask worker thread
+using pykdtree triggering OpenMP to create its workers. This has the potential of
+creating N * N worker threads which can slow down your system as it tries to
+manage and schedule that many threads.
+
+In situations like this it is recommended to limit OpenMP to 1 or 2 workers by
+defining the environment variable:
+
+.. code-block:: bash
+
+   OMP_NUM_THREADS=1
+
+This essentially shifts the parallelism responsibility to the high-level dask
+library rather than the low-level OpenMP library.
+
 Benchmarks
 ----------
 Comparison with scipy.spatial.cKDTree and libANN. This benchmark is on geospatial 3D data with 10053632 data points and 4276224 query points. The results are indexed relative to the construction time of scipy.spatial.cKDTree. A leafsize of 10 (scipy.spatial.cKDTree default) is used.

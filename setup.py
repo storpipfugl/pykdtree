@@ -189,15 +189,15 @@ with open('README.rst', 'r') as readme_file:
 extensions = [
     Extension('pykdtree.kdtree', sources=['pykdtree/kdtree.pyx', 'pykdtree/_kdtree_core.c'],
               include_dirs=[np.get_include()],
-              define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
-              cython_directives={"language_level": "3"},
+              define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_25_API_VERSION")],
+              cython_directives={"language_level": "3", "freethreading_compatible": True},
               ),
 ]
 
 
 setup(
     name='pykdtree',
-    version='1.4.1',
+    version='1.4.3',
     url="https://github.com/storpipfugl/pykdtree",
     description='Fast kd-tree implementation with OpenMP-enabled queries',
     long_description=readme,
@@ -213,14 +213,15 @@ setup(
     zip_safe=False,
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext_subclass},
+    license="LGPL-3.0-or-later",
+    license_files=["LICENSE.txt"],
     classifiers=[
       'Development Status :: 5 - Production/Stable',
-      ('License :: OSI Approved :: '
-          'GNU Lesser General Public License v3 (LGPLv3)'),
       'Programming Language :: Python',
       'Operating System :: OS Independent',
       'Intended Audience :: Science/Research',
-      'Topic :: Scientific/Engineering'
+      'Topic :: Scientific/Engineering',
+      'Programming Language :: Python :: Free Threading :: 3 - Stable',
       ]
     )
 
