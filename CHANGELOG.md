@@ -1,3 +1,20 @@
+## Version 1.4.3 (2025/08/06)
+
+### Issues Closed
+
+* [Issue 147](https://github.com/storpipfugl/pykdtree/issues/147) - No .pyi in the package
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+#### Features added
+
+* [PR 149](https://github.com/storpipfugl/pykdtree/pull/149) - Enable free-threading compatibility and bump numpy API to 1.25
+
+In this release 1 pull request was closed.
+
+
 ## Version 1.4.2 (2025/07/04)
 
 ### Issues Closed
