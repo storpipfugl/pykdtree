@@ -63,8 +63,8 @@ jobs:
           CIBW_TEST_SKIP: "*-win_arm64"
           CIBW_BUILD_VERBOSITY: 1
           # we use openmp (libomp) from homebrew which has a current limit of
-          # macos 13 (Ventura): https://formulae.brew.sh/formula/libomp
-          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=${{ matrix.deploy_target }}"
+          # macos 14 (Sonoma) on intel: https://formulae.brew.sh/formula/libomp
+          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=14"
           CIBW_BEFORE_BUILD_MACOS: "brew install libomp"
 
       - name: Upload wheel(s) as build artifacts
